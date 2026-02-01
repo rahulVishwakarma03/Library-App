@@ -8,12 +8,28 @@ describe("Library", () => {
     library = new Library({});
   });
 
-  describe("User Registration", () => {
-
-    it("register user", () => {
+  describe("Customer Registration", () => {
+    it("register customer", () => {
       assertEquals(
-        library.registerCustomer("Rahul", "abc@gmail.com", "123").success,
+        library.registerCustomer({name : "Rahul", email : "abc@gmail.com", password : "123"}).success,
         true,
+      );
+    });
+  });
+
+  describe("Customer Login", () => {
+    it("should login if customer is registered", () => {
+      library.registerCustomer({name : "Rahul", email : "abc@gmail.com", password : "123"});
+      assertEquals(
+        library.loginCustomer({email : "abc@gmail.com", password : "123"}).success,
+        true,
+      );
+    });
+    
+    it("should failed if customer is not registered", () => {
+      assertEquals(
+        library.loginCustomer("abc@gmail.com", "123").success,
+        false,
       );
     });
   });

@@ -11,15 +11,23 @@ export class Library {
     this.#currentBookId = 0;
   }
 
-  registerCustomer(customerName, email, password) {
+  registerCustomer({name, email, password}) {
     this.#library.customers.push({
-      customerId : ++(this.#currentCustomerId),
-      customerName,
+      id: ++(this.#currentCustomerId),
+      name,
       email,
       password,
-      borrowed : []
-    })
+      borrowed: [],
+    });
 
-    return {success : true}
+    return { success: true };
+  }
+
+  loginCustomer({email, password}) {
+    const customer = this.#library.customers.find((customer) =>
+      customer.email === email && customer.password === password
+    );
+  
+    return customer ? { success: true, data : {id : customer.id} } : { success: false };
   }
 }
