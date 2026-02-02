@@ -47,4 +47,14 @@ describe("Library Manager", () => {
       { success: true },
     );
   });
+
+  it("admin login request", () => {
+    assertEquals(
+      processRequest(library, {
+        command: "loginAdmin",
+        data: loginDetails,
+      }),
+      { success: false, errorCode: 402 },
+    );
+  });
 });

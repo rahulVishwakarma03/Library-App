@@ -3,6 +3,7 @@ const getHandlers = (library) => {
     registerCustomer: (data) => library.registerCustomer(data),
     registerAdmin: (data) => library.registerAdmin(data),
     loginCustomer: (data) => library.loginCustomer(data),
+    loginAdmin: (data) => library.loginAdmin(data),
   };
   return handlers;
 };

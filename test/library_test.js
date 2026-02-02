@@ -67,4 +67,21 @@ describe("Library", () => {
         );
     });
   });
+
+  describe("Admin login", () => {
+    it("should login if login details are valid", () => {
+      library.registerAdmin(registrationDetails);
+      assertEquals(
+        library.loginAdmin(loginDetails),
+        { success: true , data : {id : 1}},
+      );
+    });
+
+    it("should failed if login details are inValid", () => {
+      assertEquals(
+        library.loginAdmin(loginDetails),
+        { success: false, errorCode: 402 },
+      );
+    });
+  })
 });

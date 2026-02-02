@@ -2,6 +2,7 @@ export class Library {
   #library;
   #currentCustomerId;
   #currentBookId;
+  #currentAdminId;
 
   constructor(library) {
     this.#library = library;
@@ -10,6 +11,7 @@ export class Library {
     this.#library.books = [];
     this.#currentCustomerId = 0;
     this.#currentBookId = 0;
+    this.#currentAdminId = 0;
   }
 
   registerCustomer({ name, email, password }) {
@@ -42,6 +44,7 @@ export class Library {
     }
 
     this.#library.admins.push({
+      id: ++this.#currentAdminId,
       name,
       email,
       password,
@@ -51,12 +54,20 @@ export class Library {
   }
 
   loginCustomer({ email, password }) {
-    const customer = this.#library.customers.find((customer) =>
+    const currCustomer = this.#library.customers.find((customer) =>
       customer.email === email && customer.password === password
     );
 
-    return customer
-      ? { success: true, data: { id: customer.id } }
-      : { success: false , errorCode : 402};
+    return currCustomer
+      ? { success: true, data: { id: currCustomer.id } }
+      : { success: false, errorCode: 402 };
+  }
+
+  loginAdmin({ email, password }) {
+    const currAdmin = this.#library.admins.find((admin) =>
+      admin.email === email && admin.password === password
+    );
+
+    return currAdmin ? { success: true, data : {id : currAdmin.id} } : { success: false, errorCode: 402 };
   }
 }

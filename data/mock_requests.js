@@ -15,4 +15,12 @@ export const mock_requests = {
     command: "loginCustomer",
     data: { email: "abc12@gmail.com", password: "1234" },
   },
+  loginAdmin: {
+    command: "loginAdmin",
+    data: { email: "abc@gmail.com", password: "1234" },
+  },
+  invalidAdminLoginDetails: {
+    command: "loginAdmin",
+    data: { email: "abc12@gmail.com", password: "1234" },
+  },
 };
