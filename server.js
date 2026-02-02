@@ -1,24 +1,16 @@
 import { Library } from "./src/library.js";
+import { processRequest } from "./src/library_manager.js";
 
 const BUFFER_SIZE = 1024;
-
-const processRequest = ({command, data}, library) => {
-  const commandHandlers = {
-    registerCustomer : (data) => library.registerCustomer(data),
-    loginCustomer : (data) => library.loginCustomer(data),
-  }
-
-  return commandHandlers[command](data);
-  // return {success : false};
-};
 
 const handleConnection = async (conn, library) => {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   const buffer = new Uint8Array(BUFFER_SIZE);
+
   const bytes = await conn.read(buffer);
   const request = JSON.parse(decoder.decode(buffer.subarray(0, bytes)));
-  const response = processRequest(request, library);
+  const response = processRequest(library, request);
   await conn.write(encoder.encode(JSON.stringify(response)));
 };
 

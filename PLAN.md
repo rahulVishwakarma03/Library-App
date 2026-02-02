@@ -46,6 +46,7 @@
     -> returnBook(customerId, bookId) // returns {success : true/false}
 
   *** Admin tasks ***
+    -> registerAdmin(name,email, password) // returns {success:true}
     -> loginAdmin(email, password) // returns {success : true/false}
     -> AddBook(title, author, totalQuantity){id, borrowed is default} // returns {success : true}
     -> viewBook(bookId) // return {title, author, total, borrowed}
@@ -59,6 +60,11 @@
   example : 
 
   {
+    admin : {
+      name : adminName,
+      email : emailId,
+      password : password
+    }
     customers : [
       { userId : default id,
         name : customerName,
@@ -92,3 +98,8 @@
       registerUser(name, email, password){}
       ...
     }
+
+### Error Codes
+
+  * 401 : Already Exists
+  * 402 : invalid login details
