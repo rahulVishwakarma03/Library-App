@@ -103,3 +103,4 @@
 
   * 401 : Already Exists
   * 402 : invalid login details
+  * 403 : Book doesn't exists

@@ -69,4 +69,22 @@ describe("Library Manager", () => {
       { success: true },
     );
   });
+
+  it("view book request", () => {
+    handleRequest(library, {
+      command: "addBook",
+      data: bookDetails,
+    });
+
+    assertEquals(
+      handleRequest(library, {
+        command: "viewBook",
+        data: { id: 1 },
+      }),
+      {
+        success: true,
+        data: { ...bookDetails, id: 1, available: bookDetails.total },
+      },
+    );
+  });
 });

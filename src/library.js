@@ -12,12 +12,12 @@ export class Library {
     this.#currentBookId = 0;
   }
 
-  #find(list, { email, password }) {
+  #findInList(list, { email, password }) {
     return list.find((el) => el.email === email && el.password === password);
   }
 
   registerCustomer({ name, email, password }) {
-    const doesExist = !!this.#find(this.#library.customers, {
+    const doesExist = !!this.#findInList(this.#library.customers, {
       email,
       password,
     });
@@ -52,7 +52,7 @@ export class Library {
   }
 
   loginCustomer({ email, password }) {
-    const currCustomer = this.#find(this.#library.customers, {
+    const currCustomer = this.#findInList(this.#library.customers, {
       email,
       password,
     });
@@ -88,5 +88,13 @@ export class Library {
     });
 
     return { success: true };
+  }
+  
+  viewBook({ id }) {
+    const currBook = this.#library.books.find((book) => book.id === id);
+
+    return currBook
+      ? { success: true, data: {...currBook} }
+      : { success: false, errorCode: 403 };
   }
 }

@@ -96,10 +96,30 @@ describe("Library", () => {
     });
 
     it("should failed if book already exists", () => {
-      library.addBook(loginDetails)
+      library.addBook(bookDetails);
       assertEquals(
-        library.addBook(loginDetails),
+        library.addBook(bookDetails),
         { success: false, errorCode: 401 },
+      );
+    });
+  });
+
+  describe("View a Book", () => {
+    it("should return a book's details if book exists", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.viewBook({ id: 1 }),
+        {
+          success: true,
+          data: { ...bookDetails, id: 1, available: bookDetails.total },
+        },
+      );
+    });
+
+    it("should failed if book doesn't exist", () => {
+      assertEquals(
+        library.viewBook({ id: 1 }),
+        { success: false, errorCode: 403 },
       );
     });
   });

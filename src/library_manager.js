@@ -4,6 +4,7 @@ const handlers = {
   loginCustomer: (library, data) => library.loginCustomer(data),
   loginAdmin: (library, data) => library.loginAdmin(data),
   addBook: (library, data) => library.addBook(data),
+  viewBook: (library, data) => library.viewBook(data),
 };
 
 export const handleRequest = (library, { command, data }) => {
