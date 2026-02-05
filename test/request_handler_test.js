@@ -1,7 +1,7 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { Library } from "../src/library.js";
-import { handleRequest } from "../src/library_manager.js";
+import { handleRequest } from "../src/request_handlers.js";
 
 describe("Library Manager", () => {
   let library;
@@ -79,6 +79,24 @@ describe("Library Manager", () => {
     assertEquals(
       handleRequest(library, {
         command: "viewBook",
+        data: { id: 1 },
+      }),
+      {
+        success: true,
+        data: { ...bookDetails, id: 1, available: bookDetails.total },
+      },
+    );
+  });
+
+  it("delete book request", () => {
+    handleRequest(library, {
+      command: "addBook",
+      data: bookDetails,
+    });
+
+    assertEquals(
+      handleRequest(library, {
+        command: "deleteBook",
         data: { id: 1 },
       }),
       {

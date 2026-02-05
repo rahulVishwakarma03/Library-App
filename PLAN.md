@@ -50,7 +50,7 @@
     -> loginAdmin(email, password) // returns {success : true/false}
     -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
     -> viewBook(bookId) // return {title, author, total, available}
-    -> updateQuantity(bookId) // returns {success : true};
+    -> updateQuantity(bookId, quantity) // returns {success : true};
     -> deleteBook(bookId) // returns {success : true}
 
 ### In_Memory Structure

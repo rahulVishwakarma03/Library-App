@@ -89,12 +89,26 @@ export class Library {
 
     return { success: true };
   }
-  
+
   viewBook({ id }) {
     const currBook = this.#library.books.find((book) => book.id === id);
 
-    return currBook
-      ? { success: true, data: {...currBook} }
-      : { success: false, errorCode: 403 };
+    if (!currBook) {
+      return { success: false, errorCode: 403 };
+    }
+
+    return { success: true, data: { ...currBook} };
+  }
+
+  deleteBook({ id }) {
+    const index = this.#library.books.findIndex((book) => book.id === id);
+
+    if (index === -1) {
+      return { success: false, errorCode: 403 };
+    }
+
+    const deletedBook = this.#library.books.splice(index, 1);
+
+    return { success: true, data: { ...deletedBook[0] } };
   }
 }

@@ -31,4 +31,8 @@ export const mock_requests = {
     command: "viewBook",
     data: { id: 1 },
   },
+  deleteBook: {
+    command: "deleteBook",
+    data: { id: 1 },
+  },
 };

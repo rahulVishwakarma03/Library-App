@@ -45,7 +45,7 @@ describe("Library", () => {
       );
     });
 
-    it("should failed if login details are inValid", () => {
+    it("should fail if login details are inValid", () => {
       assertEquals(
         library.loginCustomer(loginDetails),
         { success: false, errorCode: 402 },
@@ -79,7 +79,7 @@ describe("Library", () => {
       );
     });
 
-    it("should failed if login details are inValid", () => {
+    it("should fail if login details are inValid", () => {
       assertEquals(
         library.loginAdmin(loginDetails),
         { success: false, errorCode: 402 },
@@ -95,7 +95,7 @@ describe("Library", () => {
       );
     });
 
-    it("should failed if book already exists", () => {
+    it("should fail if book already exists", () => {
       library.addBook(bookDetails);
       assertEquals(
         library.addBook(bookDetails),
@@ -116,9 +116,33 @@ describe("Library", () => {
       );
     });
 
-    it("should failed if book doesn't exist", () => {
+    it("should fail if book doesn't exist", () => {
       assertEquals(
         library.viewBook({ id: 1 }),
+        { success: false, errorCode: 403 },
+      );
+    });
+  });
+
+  describe("delete a Book", () => {
+    it("should delete a book's details if book exists", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.deleteBook({ id: 1 }),
+        {
+          success: true,
+          data: { ...bookDetails, id: 1, available: bookDetails.total },
+        },
+      );
+      assertEquals(library.viewBook({ id: 1 }), {
+        success: false,
+        errorCode: 403,
+      });
+    });
+
+    it("should fail if book doesn't exist", () => {
+      assertEquals(
+        library.deleteBook({ id: 1 }),
         { success: false, errorCode: 403 },
       );
     });
