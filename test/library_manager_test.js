@@ -1,12 +1,13 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { Library } from "../src/library.js";
-import { processRequest } from "../src/library_manager.js";
+import { handleRequest } from "../src/library_manager.js";
 
 describe("Library Manager", () => {
   let library;
   let registrationDetails;
   let loginDetails;
+  let bookDetails;
 
   beforeEach(() => {
     library = new Library({});
@@ -16,11 +17,12 @@ describe("Library Manager", () => {
       password: "123",
     };
     loginDetails = { email: "abc@gmail.com", password: "123" };
+    bookDetails = { title: "Let Us C", author: "Yaswant Kanetkar", total: 5 };
   });
 
   it("customer registration request", () => {
     assertEquals(
-      processRequest(library, {
+      handleRequest(library, {
         command: "registerCustomer",
         data: registrationDetails,
       }),
@@ -30,7 +32,7 @@ describe("Library Manager", () => {
 
   it("customer login request", () => {
     assertEquals(
-      processRequest(library, {
+      handleRequest(library, {
         command: "loginCustomer",
         data: loginDetails,
       }),
@@ -40,7 +42,7 @@ describe("Library Manager", () => {
 
   it("admin registration request", () => {
     assertEquals(
-      processRequest(library, {
+      handleRequest(library, {
         command: "registerAdmin",
         data: registrationDetails,
       }),
@@ -50,11 +52,21 @@ describe("Library Manager", () => {
 
   it("admin login request", () => {
     assertEquals(
-      processRequest(library, {
+      handleRequest(library, {
         command: "loginAdmin",
         data: loginDetails,
       }),
       { success: false, errorCode: 402 },
+    );
+  });
+
+  it("add book request", () => {
+    assertEquals(
+      handleRequest(library, {
+        command: "addBook",
+        data: bookDetails,
+      }),
+      { success: true },
     );
   });
 });

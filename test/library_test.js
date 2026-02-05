@@ -6,6 +6,7 @@ describe("Library", () => {
   let library;
   let registrationDetails;
   let loginDetails;
+  let bookDetails;
 
   beforeEach(() => {
     library = new Library({});
@@ -15,6 +16,7 @@ describe("Library", () => {
       password: "123",
     };
     loginDetails = { email: "abc@gmail.com", password: "123" };
+    bookDetails = { title: "Let Us C", author: "Yashwant Kanetkar", total: 5 };
   });
 
   describe("Customer Registration", () => {
@@ -73,7 +75,7 @@ describe("Library", () => {
       library.registerAdmin(registrationDetails);
       assertEquals(
         library.loginAdmin(loginDetails),
-        { success: true , data : {id : 1}},
+        { success: true, data: { email: loginDetails.email } },
       );
     });
 
@@ -83,5 +85,22 @@ describe("Library", () => {
         { success: false, errorCode: 402 },
       );
     });
-  })
+  });
+
+  describe("Add New Book", () => {
+    it("should add new book if book doesn't exist", () => {
+      assertEquals(
+        library.addBook(bookDetails),
+        { success: true },
+      );
+    });
+
+    it("should failed if book already exists", () => {
+      library.addBook(loginDetails)
+      assertEquals(
+        library.addBook(loginDetails),
+        { success: false, errorCode: 401 },
+      );
+    });
+  });
 });

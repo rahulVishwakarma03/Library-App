@@ -40,7 +40,7 @@
   *** Customer tasks ***
     -> registerCustomer(name,email, password) // returns {success:true}
     -> loginCustomer(email, password) // returns {success : true/false}
-    -> listBooks(library)// returns all books
+    -> listBooks()// returns all books
     -> listReading(customerId) // returns books borrowed by the customer itself
     -> borrowBook(customerId, bookId) // returns {success : true/false}
     -> returnBook(customerId, bookId) // returns {success : true/false}
@@ -48,8 +48,8 @@
   *** Admin tasks ***
     -> registerAdmin(name,email, password) // returns {success:true}
     -> loginAdmin(email, password) // returns {success : true/false}
-    -> AddBook(title, author, totalQuantity){id, borrowed is default} // returns {success : true}
-    -> viewBook(bookId) // return {title, author, total, borrowed}
+    -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
+    -> viewBook(bookId) // return {title, author, total, available}
     -> updateQuantity(bookId) // returns {success : true};
     -> deleteBook(bookId) // returns {success : true}
 

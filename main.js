@@ -7,7 +7,7 @@ const PORT = 8000;
 const main = async (hostname, port) => {
   const conn = await connectToServer(hostname, port);
 
-  const req = mock_requests.invalidAdminLoginDetails;
+  const req = mock_requests.addBook;
 
   const response = await handleUserRequest(conn, req);
   console.log(response);

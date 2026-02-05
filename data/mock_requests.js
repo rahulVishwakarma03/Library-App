@@ -23,4 +23,8 @@ export const mock_requests = {
     command: "loginAdmin",
     data: { email: "abc12@gmail.com", password: "1234" },
   },
+  addBook : {
+    command : "addBook",
+    data : { title: "Let Us C", author: "Yaswant Kanetkar", total: 5 }
+  }
 };

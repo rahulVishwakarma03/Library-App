@@ -2,24 +2,27 @@ export class Library {
   #library;
   #currentCustomerId;
   #currentBookId;
-  #currentAdminId;
 
   constructor(library) {
     this.#library = library;
-    this.#library.admins = [];
+    this.#library.admin = {};
     this.#library.customers = [];
     this.#library.books = [];
     this.#currentCustomerId = 0;
     this.#currentBookId = 0;
-    this.#currentAdminId = 0;
+  }
+
+  #find(list, { email, password }) {
+    return list.find((el) => el.email === email && el.password === password);
   }
 
   registerCustomer({ name, email, password }) {
-    const doesExists = this.#library.customers.some((customer) =>
-      customer.email === email && customer.password === password
-    );
+    const doesExist = !!this.#find(this.#library.customers, {
+      email,
+      password,
+    });
 
-    if (doesExists) {
+    if (doesExist) {
       return { success: false, errorCode: 401 };
     }
 
@@ -35,28 +38,24 @@ export class Library {
   }
 
   registerAdmin({ name, email, password }) {
-    const doesExists = this.#library.admins.some((admin) =>
-      admin.email === email && admin.password === password
-    );
-
-    if (doesExists) {
+    if (Object.keys(this.#library.admin).length !== 0) {
       return { success: false, errorCode: 401 };
     }
 
-    this.#library.admins.push({
-      id: ++this.#currentAdminId,
+    this.#library.admin = {
       name,
       email,
       password,
-    });
+    };
 
     return { success: true };
   }
 
   loginCustomer({ email, password }) {
-    const currCustomer = this.#library.customers.find((customer) =>
-      customer.email === email && customer.password === password
-    );
+    const currCustomer = this.#find(this.#library.customers, {
+      email,
+      password,
+    });
 
     return currCustomer
       ? { success: true, data: { id: currCustomer.id } }
@@ -64,10 +63,30 @@ export class Library {
   }
 
   loginAdmin({ email, password }) {
-    const currAdmin = this.#library.admins.find((admin) =>
-      admin.email === email && admin.password === password
+    const { id, email: orgEmail, password: orgPassword } = this.#library.admin;
+
+    return email === orgEmail && password === orgPassword
+      ? { success: true, data: { email: orgEmail } }
+      : { success: false, errorCode: 402 };
+  }
+
+  addBook({ title, author, total }) {
+    const doesBookExist = this.#library.books.some((book) =>
+      book.title === title && book.author === author
     );
 
-    return currAdmin ? { success: true, data : {id : currAdmin.id} } : { success: false, errorCode: 402 };
+    if (doesBookExist) {
+      return { success: false, errorCode: 401 };
+    }
+
+    this.#library.books.push({
+      id: ++this.#currentBookId,
+      title,
+      author,
+      total,
+      available: total,
+    });
+
+    return { success: true };
   }
 }
