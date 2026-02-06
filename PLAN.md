@@ -38,20 +38,22 @@
 ### Top Level Functions for different features
 
   *** Customer tasks ***
-    -> registerCustomer(name,email, password) // returns {success:true}
-    -> loginCustomer(email, password) // returns {success : true/false}
-    -> listBooks()// returns all books
-    -> listReading(customerId) // returns books borrowed by the customer itself
-    -> borrowBook(customerId, bookId) // returns {success : true/false}
+  ✅  -> registerCustomer(name,email, password) // returns {success:true}
+  ✅  -> loginCustomer(email, password) // returns {success : true/false}
+  ✅  -> listBooks()// returns all books
+  ✅  -> listBorrowed(customerId) // returns books borrowed by the customer itself
+  ✅  -> borrowBook(customerId, bookId) // returns {success : true/false}
     -> returnBook(customerId, bookId) // returns {success : true/false}
 
   *** Admin tasks ***
-    -> registerAdmin(name,email, password) // returns {success:true}
-    -> loginAdmin(email, password) // returns {success : true/false}
-    -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
-    -> viewBook(bookId) // return {title, author, total, available}
-    -> updateQuantity(bookId, quantity) // returns {success : true};
-    -> deleteBook(bookId) // returns {success : true}
+  ✅  -> registerAdmin(name,email, password) // returns {success:true}
+  ✅  -> loginAdmin(email, password) // returns {success : true/false}
+  ✅  -> listBooks()// returns all books
+   -> listCustomers()// returns all customers
+  ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
+  ✅  -> viewBook(bookId) // return {title, author, total, available}
+     -> updateQuantity(bookId, quantity) // returns {success : true};
+  ✅  -> deleteBook(bookId) // returns {success : true}
 
 ### In_Memory Structure
   
@@ -102,6 +104,6 @@
 ### Error Codes
 
   * 401 : Already Exists
-  * 402 : invalid login details
-  * 403 : Book doesn't exists
-  * 404 : No Books available
+  * 402 : invalid given details
+  * 403 : requested book is not available
+  * 404 : No Book available(list is empty)

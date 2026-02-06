@@ -1,6 +1,7 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { Library } from "../src/library.js";
+import { mockRequests } from "../data/mock_requests.js";
 
 describe("Library", () => {
   let library;
@@ -10,13 +11,9 @@ describe("Library", () => {
 
   beforeEach(() => {
     library = new Library({});
-    registrationDetails = {
-      name: "ABC",
-      email: "abc@gmail.com",
-      password: "123",
-    };
-    loginDetails = { email: "abc@gmail.com", password: "123" };
-    bookDetails = { title: "Let Us C", author: "Yashwant Kanetkar", total: 5 };
+    registrationDetails = mockRequests.registerCustomer.data;
+    loginDetails = mockRequests.loginCustomer.data;
+    bookDetails = mockRequests.addBook.data;
   });
 
   describe("Customer Registration", () => {
@@ -41,7 +38,7 @@ describe("Library", () => {
       library.registerCustomer(registrationDetails);
       assertEquals(
         library.loginCustomer(loginDetails),
-        { success: true, data: { id: 1 } },
+        { success: true, data: { customerId: 1 } },
       );
     });
 
@@ -105,64 +102,138 @@ describe("Library", () => {
   });
 
   describe("View a Book", () => {
-    it("should return a book's details if book exists", () => {
+    it("should give a book's details if book exists", () => {
       library.addBook(bookDetails);
       assertEquals(
-        library.viewBook({ id: 1 }),
+        library.viewBook({ bookId: 1 }),
         {
           success: true,
-          data: { ...bookDetails, id: 1, available: bookDetails.total },
+          data: { ...bookDetails, bookId: 1, available: bookDetails.total },
         },
       );
     });
 
     it("should fail if book doesn't exist", () => {
       assertEquals(
-        library.viewBook({ id: 1 }),
-        { success: false, errorCode: 403 },
+        library.viewBook({ bookId: 1 }),
+        { success: false, errorCode: 402 },
       );
     });
   });
 
-  describe("delete a Book", () => {
-    it("should delete a book's details if book exists", () => {
+  describe("Remove a Book", () => {
+    it("should remove a book's details if book exists", () => {
       library.addBook(bookDetails);
       assertEquals(
-        library.deleteBook({ id: 1 }),
+        library.removeBook({ bookId: 1 }),
         {
           success: true,
-          data: { ...bookDetails, id: 1, available: bookDetails.total },
+          data: { ...bookDetails, bookId: 1, available: bookDetails.total },
         },
       );
-      assertEquals(library.viewBook({ id: 1 }), {
+      assertEquals(library.viewBook({ bookId: 1 }), {
         success: false,
-        errorCode: 403,
+        errorCode: 402,
       });
     });
 
     it("should fail if book doesn't exist", () => {
       assertEquals(
-        library.deleteBook({ id: 1 }),
-        { success: false, errorCode: 403 },
+        library.removeBook({ bookId: 1 }),
+        { success: false, errorCode: 402 },
       );
     });
   });
 
-  describe("List Books", () => {
-    it("should return all books", () => {
+  describe("List all Books", () => {
+    it("should give all books", () => {
       library.addBook(bookDetails);
       assertEquals(
-        library.listBooks(),
+        library.listAllBooks(),
         {
           success: true,
-          data: [{ ...bookDetails, id: 1, available: bookDetails.total }],
+          data: [{ ...bookDetails, bookId: 1, available: bookDetails.total }],
         },
       );
     });
 
     it("should fail if book doesn't exist", () => {
       assertEquals(
-        library.listBooks(),
+        library.listAllBooks(),
+        { success: false, errorCode: 404 },
+      );
+    });
+  });
+
+  describe("Borrow Books", () => {
+    beforeEach(() => {
+      library.registerCustomer(registrationDetails);
+    });
+
+    it("should borrow book if book is available and given details are valid", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.borrowBook({ customerId: 1, bookId: 1 }),
+        { success: true },
+      );
+    });
+
+    it("should fail if book is not available", () => {
+      library.addBook({ ...bookDetails, total: 0 });
+      assertEquals(
+        library.borrowBook({ customerId: 1, bookId: 1 }),
+        { success: false, errorCode: 403 },
+      );
+    });
+
+    it("should fail if customer details is invalid", () => {
+      assertEquals(
+        library.borrowBook({ customerId: 5 }),
+        { success: false, errorCode: 402 },
+      );
+    });
+
+    it("should fail if book details is invalid", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.borrowBook({ customerId: 1, bookId: 4 }),
+        { success: false, errorCode: 402 },
+      );
+    });
+  });
+
+  describe("List borrowed Books", () => {
+    beforeEach(() => {
+      library.registerCustomer(registrationDetails);
+      library.addBook(bookDetails);
+    });
+
+    it("should list borrowed books by a customer", () => {
+      library.borrowBook({ customerId: 1, bookId: 1 });
+
+      assertEquals(
+        library.listBorrowed({ customerId: 1 }),
+        {
+          success: true,
+          data: [{
+            title: bookDetails.title,
+            author: bookDetails.author,
+            bookId: 1,
+          }],
+        },
+      );
+    });
+
+    it("should fail if customer details is invalid", () => {
+      assertEquals(
+        library.listBorrowed({ customerId: 5 }),
+        { success: false, errorCode: 402 },
+      );
+    });
+
+    it("should fail if book doesn't exist", () => {
+      assertEquals(
+        library.listBorrowed({ customerId: 1 }),
         { success: false, errorCode: 404 },
       );
     });

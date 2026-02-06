@@ -27,7 +27,7 @@ export class Library {
     }
 
     this.#library.customers.push({
-      id: ++this.#currentCustomerId,
+      customerId: ++this.#currentCustomerId,
       name,
       email,
       password,
@@ -58,7 +58,7 @@ export class Library {
     });
 
     return currCustomer
-      ? { success: true, data: { id: currCustomer.id } }
+      ? { success: true, data: { customerId: currCustomer.customerId } }
       : { success: false, errorCode: 402 };
   }
 
@@ -80,7 +80,7 @@ export class Library {
     }
 
     this.#library.books.push({
-      id: ++this.#currentBookId,
+      bookId: ++this.#currentBookId,
       title,
       author,
       total,
@@ -90,21 +90,23 @@ export class Library {
     return { success: true };
   }
 
-  viewBook({ id }) {
-    const currBook = this.#library.books.find((book) => book.id === id);
+  viewBook({ bookId }) {
+    const currBook = this.#library.books.find((book) => book.bookId === bookId);
 
     if (!currBook) {
-      return { success: false, errorCode: 403 };
+      return { success: false, errorCode: 402 };
     }
 
     return { success: true, data: currBook };
   }
 
-  deleteBook({ id }) {
-    const index = this.#library.books.findIndex((book) => book.id === id);
+  removeBook({ bookId }) {
+    const index = this.#library.books.findIndex((book) =>
+      book.bookId === bookId
+    );
 
     if (index === -1) {
-      return { success: false, errorCode: 403 };
+      return { success: false, errorCode: 402 };
     }
 
     const deletedBook = this.#library.books.splice(index, 1);
@@ -112,12 +114,52 @@ export class Library {
     return { success: true, data: deletedBook[0] };
   }
 
-  listBooks() {
+  listAllBooks() {
     const books = this.#library.books;
     if (books.length === 0) {
       return { success: false, errorCode: 404 };
     }
 
     return { success: true, data: books };
+  }
+
+  listBorrowed({ customerId }) {
+    const customer = this.#library.customers.find((customer) =>
+      customer.customerId === customerId
+    );
+
+    if (customer === undefined) {
+      return { success: false, errorCode: 402 };
+    }
+
+    const borrowedBooks = customer.borrowed;
+
+    if (borrowedBooks.length === 0) {
+      return { success: false, errorCode: 404 };
+    }
+
+    return { success: true, data: borrowedBooks };
+  }
+
+  borrowBook({ customerId, bookId: bId }) {
+    const customer = this.#library.customers.find((customer) =>
+      customer.customerId === customerId
+    );
+
+    const book = this.#library.books.find((book) => book.bookId === bId);
+
+    if (customer === undefined || book === undefined) {
+      return { success: false, errorCode: 402 };
+    }
+
+    const { bookId, title, author, available } = book;
+
+    if (available === 0) {
+      return { success: false, errorCode: 403 };
+    }
+
+    customer.borrowed.push({ bookId, title, author });
+    book.available -= 1;
+    return { success: true };
   }
 }

@@ -1,4 +1,4 @@
-export const mock_requests = {
+export const mockRequests = {
   registerCustomer: {
     command: "registerCustomer",
     data: { name: "abc", email: "abc@gmail.com", password: "1234" },
@@ -29,14 +29,22 @@ export const mock_requests = {
   },
   viewBook: {
     command: "viewBook",
-    data: { id: 1 },
+    data: { bookId: 1 },
   },
-  deleteBook: {
-    command: "deleteBook",
-    data: { id: 1 },
+  removeBook: {
+    command: "removeBook",
+    data: { bookId: 1 },
   },
-  listBooks: {
-    command: "listBooks",
+  listAllBooks: {
+    command: "listAllBooks",
     data: {},
+  },
+  borrowBook: {
+    command: "borrowBook",
+    data: { customerId: 1, bookId: 1 },
+  },
+  listBorrowed: {
+    command: "listBorrowed",
+    data: { customerId: 1 },
   },
 };

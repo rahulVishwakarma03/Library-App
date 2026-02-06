@@ -5,8 +5,10 @@ const requestHandlers = {
   loginAdmin: (library, data) => library.loginAdmin(data),
   addBook: (library, data) => library.addBook(data),
   viewBook: (library, data) => library.viewBook(data),
-  deleteBook: (library, data) => library.deleteBook(data),
-  listBooks: (library, data) => library.listBooks(data),
+  removeBook: (library, data) => library.removeBook(data),
+  listAllBooks: (library, data) => library.listAllBooks(data),
+  borrowBook: (library, data) => library.borrowBook(data),
+  listBorrowed: (library, data) => library.listBorrowed(data),
 };
 
 export const handleRequest = (library, { command, data }) => {
