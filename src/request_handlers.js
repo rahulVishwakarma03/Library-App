@@ -6,6 +6,7 @@ const requestHandlers = {
   addBook: (library, data) => library.addBook(data),
   viewBook: (library, data) => library.viewBook(data),
   deleteBook: (library, data) => library.deleteBook(data),
+  listBooks: (library, data) => library.listBooks(data),
 };
 
 export const handleRequest = (library, { command, data }) => {

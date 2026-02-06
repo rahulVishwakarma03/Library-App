@@ -35,4 +35,8 @@ export const mock_requests = {
     command: "deleteBook",
     data: { id: 1 },
   },
+  listBooks: {
+    command: "listBooks",
+    data: {},
+  },
 };

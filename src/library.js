@@ -63,7 +63,7 @@ export class Library {
   }
 
   loginAdmin({ email, password }) {
-    const { id, email: orgEmail, password: orgPassword } = this.#library.admin;
+    const { email: orgEmail, password: orgPassword } = this.#library.admin;
 
     return email === orgEmail && password === orgPassword
       ? { success: true, data: { email: orgEmail } }
@@ -97,7 +97,7 @@ export class Library {
       return { success: false, errorCode: 403 };
     }
 
-    return { success: true, data: { ...currBook} };
+    return { success: true, data: currBook };
   }
 
   deleteBook({ id }) {
@@ -109,6 +109,15 @@ export class Library {
 
     const deletedBook = this.#library.books.splice(index, 1);
 
-    return { success: true, data: { ...deletedBook[0] } };
+    return { success: true, data: deletedBook[0] };
+  }
+
+  listBooks() {
+    const books = this.#library.books;
+    if (books.length === 0) {
+      return { success: false, errorCode: 404 };
+    }
+
+    return { success: true, data: books };
   }
 }

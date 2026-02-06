@@ -147,4 +147,24 @@ describe("Library", () => {
       );
     });
   });
+
+  describe("List Books", () => {
+    it("should return all books", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.listBooks(),
+        {
+          success: true,
+          data: [{ ...bookDetails, id: 1, available: bookDetails.total }],
+        },
+      );
+    });
+
+    it("should fail if book doesn't exist", () => {
+      assertEquals(
+        library.listBooks(),
+        { success: false, errorCode: 404 },
+      );
+    });
+  });
 });

@@ -105,4 +105,22 @@ describe("Library Manager", () => {
       },
     );
   });
+
+  it("list books request", () => {
+    handleRequest(library, {
+      command: "addBook",
+      data: bookDetails,
+    });
+
+    assertEquals(
+      handleRequest(library, {
+        command: "listBooks",
+        data: {},
+      }),
+      {
+        success: true,
+        data: [{ ...bookDetails, id: 1, available: bookDetails.total }],
+      },
+    );
+  });
 });
