@@ -52,13 +52,13 @@ export class Library {
   }
 
   loginCustomer({ email, password }) {
-    const currCustomer = this.#findInList(this.#library.customers, {
+    const customer = this.#findInList(this.#library.customers, {
       email,
       password,
     });
 
-    return currCustomer
-      ? { success: true, data: { customerId: currCustomer.customerId } }
+    return customer
+      ? { success: true, data: { customerId: customer.customerId } }
       : { success: false, errorCode: 402 };
   }
 
@@ -91,13 +91,13 @@ export class Library {
   }
 
   viewBook({ bookId }) {
-    const currBook = this.#library.books.find((book) => book.bookId === bookId);
+    const book = this.#library.books.find((book) => book.bookId === bookId);
 
-    if (!currBook) {
+    if (book === undefined) {
       return { success: false, errorCode: 402 };
     }
 
-    return { success: true, data: currBook };
+    return { success: true, data: book };
   }
 
   removeBook({ bookId }) {

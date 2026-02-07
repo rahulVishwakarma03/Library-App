@@ -102,9 +102,34 @@
       ...
     }
 
-### Error Codes
+<!-- ### Error Codes
 
   * 401 : Already Exists
   * 402 : invalid given details
   * 403 : requested book is not available
-  * 404 : No Book available(list is empty)
+  * 404 : No Book available(list is empty) -->
+
+
+### TYPES OF ERROR
+  * 400 : Validation Error (invalid name,email, password,title ...)
+  * 401 : Authentication Error (wrong login details)
+  * 404 : Not Found Error (customerId, bookId)
+  * 409 : Conflict Error (already Exists)
+  * 500 : Server Error  (db connection failed)
+
+### Codes For success
+  * 200 : mainly used for get(ex : list books, list borrowed) 
+  * 201 : mainly used for post(ex : registerCustomer, registerAdmin, addBook) // return the id or object
+  * 204 : mainly used for put ( eg : removeBook, updateQuantity); // body is not expected
+
+
+
+### ERROR HANDLING
+
+  ## Create custom Error class 
+    * AppError extends Error class
+    * ValidationError extends AppError
+    * Authentication extends AppError
+    * NotFoundError extends AppError
+    * ConflictError extends AppError
+    * ServerError extends AppError
