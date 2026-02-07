@@ -9,6 +9,7 @@ const requestHandlers = {
   listAllBooks: (library, data) => library.listAllBooks(data),
   borrowBook: (library, data) => library.borrowBook(data),
   listBorrowed: (library, data) => library.listBorrowed(data),
+  returnBook: (library, data) => library.returnBook(data),
 };
 
 export const handleRequest = (library, { command, data }) => {

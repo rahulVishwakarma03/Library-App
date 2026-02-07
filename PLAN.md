@@ -43,13 +43,13 @@
   ✅  -> listBooks()// returns all books
   ✅  -> listBorrowed(customerId) // returns books borrowed by the customer itself
   ✅  -> borrowBook(customerId, bookId) // returns {success : true/false}
-    -> returnBook(customerId, bookId) // returns {success : true/false}
+  ✅  -> returnBook(customerId, bookId) // returns {success : true/false}
 
   *** Admin tasks ***
   ✅  -> registerAdmin(name,email, password) // returns {success:true}
   ✅  -> loginAdmin(email, password) // returns {success : true/false}
   ✅  -> listBooks()// returns all books
-   -> listCustomers()// returns all customers
+    -> listCustomers()// returns all customers
   ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
   ✅  -> viewBook(bookId) // return {title, author, total, available}
      -> updateQuantity(bookId, quantity) // returns {success : true};
@@ -68,11 +68,12 @@
       password : password
     }
     customers : [
-      { userId : default id,
+      { customerId : default id,
         name : customerName,
         email : emailId,
         password : password,
         borrowed : [{
+          bookId : bookId
           title : bookName,
           author : authorName
           },{},..]
@@ -85,7 +86,7 @@
         title : BookName,
         author : authorName,
         total : totalCopies,
-        available : noOfAvailableCopies
+        available : TotalAvailableCopies
       }, {},....
     ]
   }

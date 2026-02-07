@@ -123,4 +123,22 @@ describe("Library Manager", () => {
       },
     );
   });
+
+  it("return book request", () => {
+    handleRequest(library, mockRequests.registerCustomer);
+    handleRequest(library, mockRequests.addBook);
+    handleRequest(library, mockRequests.borrowBook);
+
+    assertEquals(
+      handleRequest(library, mockRequests.returnBook),
+      {
+        success: true,
+        data: {
+          title: mockRequests.addBook.data.title,
+          author: mockRequests.addBook.data.author,
+          bookId: 1,
+        },
+      },
+    );
+  });
 });

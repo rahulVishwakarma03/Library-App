@@ -162,4 +162,28 @@ export class Library {
     book.available -= 1;
     return { success: true };
   }
+
+  returnBook({ customerId, bookId: bId }) {
+    const customer = this.#library.customers.find((customer) =>
+      customer.customerId === customerId
+    );
+    const book = this.#library.books.find((book) => book.bookId === bId);
+
+    if (customer === undefined) {
+      return { success: false, errorCode: 402 };
+    }
+
+    const bookIndex = customer.borrowed.findIndex((book) =>
+      book.bookId === bId
+    );
+
+    if (bookIndex === -1) {
+      return { success: false, errorCode: 402 };
+    }
+
+    const returnedBook = customer.borrowed.splice(bookIndex, 1);
+
+    book.available += 1;
+    return { success: true, data: returnedBook[0] };
+  }
 }

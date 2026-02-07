@@ -47,4 +47,8 @@ export const mockRequests = {
     command: "listBorrowed",
     data: { customerId: 1 },
   },
+  returnBook: {
+    command: "returnBook",
+    data: { customerId: 1, bookId: 1 },
+  },
 };

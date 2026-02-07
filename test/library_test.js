@@ -238,4 +238,40 @@ describe("Library", () => {
       );
     });
   });
+
+  describe("return a borrowed Book", () => {
+    beforeEach(() => {
+      library.registerCustomer(registrationDetails);
+      library.addBook(bookDetails);
+      library.borrowBook({ customerId: 1, bookId: 1 });
+    });
+
+    it("should return a borrowed book by a customer", () => {
+      assertEquals(
+        library.returnBook({ customerId: 1, bookId: 1 }),
+        {
+          success: true,
+          data: {
+            bookId: 1,
+            title: bookDetails.title,
+            author: bookDetails.author,
+          },
+        },
+      );
+    });
+
+    it("should fail if customer details is invalid", () => {
+      assertEquals(
+        library.returnBook({ customerId: 5 }),
+        { success: false, errorCode: 402 },
+      );
+    });
+
+    it("should fail if book details is invalid", () => {
+      assertEquals(
+        library.returnBook({ customerId: 1, bookId: 2 }),
+        { success: false, errorCode: 402 },
+      );
+    });
+  });
 });
