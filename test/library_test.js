@@ -53,7 +53,7 @@ describe("Library", () => {
         assertThrows(
           () => library.loginCustomer(loginDetails),
           AuthenticationError,
-          "Customer login credential mismatched",
+          "Customer login credential is wrong",
         );
     });
   });
@@ -89,7 +89,7 @@ describe("Library", () => {
       assertThrows(
         () => library.loginAdmin(loginDetails),
         AuthenticationError,
-        "Admin login credential mismatched",
+        "Admin login credential is wrong",
       );
     });
   });

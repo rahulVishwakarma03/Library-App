@@ -18,17 +18,24 @@ export class Library {
     this.#currentBookId = 0;
   }
 
-  #findInList(list, { email, password }) {
-    return list.find((el) => el.email === email && el.password === password);
+  #findCustomerBy(details) {
+    return this.#library.customers.find((el) =>
+      el.customerId === details.customerId ||
+      (el.email === details.email && el.password === details.password)
+    );
+  }
+
+  #findBookBy(details) {
+    return this.#library.books.find((el) =>
+      el.bookId === details.bookId ||
+      (el.title === details.title && el.author === details.author)
+    );
   }
 
   registerCustomer({ name, email, password }) {
-    const doesExist = !!this.#findInList(this.#library.customers, {
-      email,
-      password,
-    });
+    const customer = this.#findCustomerBy({ email, password });
 
-    if (doesExist) {
+    if (customer) {
       throw new ConflictError("Customer already exists");
     }
 
@@ -59,13 +66,10 @@ export class Library {
   }
 
   loginCustomer({ email, password }) {
-    const customer = this.#findInList(this.#library.customers, {
-      email,
-      password,
-    });
+    const customer = this.#findCustomerBy({ email, password });
 
     if (!customer) {
-      throw new AuthenticationError("Customer login credential mismatched");
+      throw new AuthenticationError("Customer login credential is wrong");
     }
 
     return {
@@ -83,15 +87,13 @@ export class Library {
       return { success: true, status: 200, data: { adminId } };
     }
 
-    throw new AuthenticationError("Admin login credential mismatched");
+    throw new AuthenticationError("Admin login credential is wrong");
   }
 
   addBook({ title, author, total }) {
-    const doesBookExist = this.#library.books.some((book) =>
-      book.title === title && book.author === author
-    );
+    const book = this.#findBookBy({ title, author });
 
-    if (doesBookExist) {
+    if (book) {
       throw new ConflictError("Book already exists");
     }
 
@@ -111,7 +113,7 @@ export class Library {
   }
 
   viewBook({ bookId }) {
-    const book = this.#library.books.find((book) => book.bookId === bookId);
+    const book = this.#findBookBy({ bookId });
 
     if (!book) {
       throw new NotFoundError("Book not found");
@@ -121,15 +123,15 @@ export class Library {
   }
 
   removeBook({ bookId }) {
-    const index = this.#library.books.findIndex((book) =>
+    const bookIndex = this.#library.books.findIndex((book) =>
       book.bookId === bookId
     );
 
-    if (index === -1) {
+    if (bookIndex === -1) {
       throw new AuthenticationError("Wrong bookId");
     }
 
-    this.#library.books.splice(index, 1);
+    this.#library.books.splice(bookIndex, 1);
 
     return { success: true, status: 204 };
   }
@@ -144,9 +146,7 @@ export class Library {
   }
 
   listBorrowed({ customerId }) {
-    const customer = this.#library.customers.find((customer) =>
-      customer.customerId === customerId
-    );
+    const customer = this.#findCustomerBy({ customerId });
 
     if (customer === undefined) {
       throw new AuthenticationError("Wrong customerId");
@@ -161,18 +161,16 @@ export class Library {
     return { success: true, status: 200, data: borrowedBooks };
   }
 
-  borrowBook({ customerId, bookId: bId }) {
-    const customer = this.#library.customers.find((customer) =>
-      customer.customerId === customerId
-    );
+  borrowBook({ customerId, bookId }) {
+    const customer = this.#findCustomerBy({ customerId });
 
-    const book = this.#library.books.find((book) => book.bookId === bId);
+    const book = this.#findBookBy({ bookId });
 
     if (customer === undefined || book === undefined) {
       throw new AuthenticationError("Wrong customerId or bookId");
     }
 
-    const { bookId, title, author, available } = book;
+    const { title, author, available } = book;
 
     if (available === 0) {
       throw new ConflictError("Insufficient book copies");
@@ -183,18 +181,16 @@ export class Library {
     return { success: true, status: 204 };
   }
 
-  returnBook({ customerId, bookId: bId }) {
-    const customer = this.#library.customers.find((customer) =>
-      customer.customerId === customerId
-    );
-    const book = this.#library.books.find((book) => book.bookId === bId);
+  returnBook({ customerId, bookId }) {
+    const customer = this.#findCustomerBy({ customerId });
+    const book = this.#findBookBy({ bookId });
 
     if (customer === undefined) {
       throw new AuthenticationError("Wrong customerId");
     }
 
     const bookIndex = customer.borrowed.findIndex((book) =>
-      book.bookId === bId
+      book.bookId === bookId
     );
 
     if (bookIndex === -1) {

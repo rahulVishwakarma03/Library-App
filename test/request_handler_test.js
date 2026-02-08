@@ -11,6 +11,13 @@ describe("Request handler", () => {
     library = new Library({});
   });
 
+  it("failing customer registration request", () => {
+    handleRequest(library, mockRequests.registerCustomer);
+    const response = handleRequest(library, mockRequests.registerCustomer);
+    assertEquals(response.success, false);
+    assertEquals(response.status, 409);
+  });
+
   it("customer registration request", () => {
     assertEquals(
       handleRequest(library, mockRequests.registerCustomer),
