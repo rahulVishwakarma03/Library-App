@@ -1,3 +1,9 @@
+import {
+  AuthenticationError,
+  ConflictError,
+  NotFoundError,
+} from "./custom_errors.js";
+
 export class Library {
   #library;
   #currentCustomerId;
@@ -23,7 +29,7 @@ export class Library {
     });
 
     if (doesExist) {
-      return { success: false, errorCode: 401 };
+      throw new ConflictError("Customer already exists");
     }
 
     this.#library.customers.push({
@@ -34,21 +40,22 @@ export class Library {
       borrowed: [],
     });
 
-    return { success: true };
+    return { success: true, status: 201 };
   }
 
   registerAdmin({ name, email, password }) {
     if (Object.keys(this.#library.admin).length !== 0) {
-      return { success: false, errorCode: 401 };
+      throw new ConflictError("Admin already exists");
     }
 
     this.#library.admin = {
+      adminId: 1,
       name,
       email,
       password,
     };
 
-    return { success: true };
+    return { success: true, status: 201 };
   }
 
   loginCustomer({ email, password }) {
@@ -57,17 +64,26 @@ export class Library {
       password,
     });
 
-    return customer
-      ? { success: true, data: { customerId: customer.customerId } }
-      : { success: false, errorCode: 402 };
+    if (!customer) {
+      throw new AuthenticationError("Customer login credential mismatched");
+    }
+
+    return {
+      success: true,
+      status: 200,
+      data: { customerId: customer.customerId },
+    };
   }
 
   loginAdmin({ email, password }) {
-    const { email: orgEmail, password: orgPassword } = this.#library.admin;
+    const { adminId, email: orgEmail, password: orgPassword } =
+      this.#library.admin;
 
-    return email === orgEmail && password === orgPassword
-      ? { success: true, data: { email: orgEmail } }
-      : { success: false, errorCode: 402 };
+    if (email === orgEmail && password === orgPassword) {
+      return { success: true, status: 200, data: { adminId } };
+    }
+
+    throw new AuthenticationError("Admin login credential mismatched");
   }
 
   addBook({ title, author, total }) {
@@ -76,7 +92,7 @@ export class Library {
     );
 
     if (doesBookExist) {
-      return { success: false, errorCode: 401 };
+      throw new ConflictError("Book already exists");
     }
 
     this.#library.books.push({
@@ -87,17 +103,21 @@ export class Library {
       available: total,
     });
 
-    return { success: true };
+    return {
+      success: true,
+      status: 201,
+      data: { bookId: this.#currentBookId },
+    };
   }
 
   viewBook({ bookId }) {
     const book = this.#library.books.find((book) => book.bookId === bookId);
 
-    if (book === undefined) {
-      return { success: false, errorCode: 402 };
+    if (!book) {
+      throw new NotFoundError("Book not found");
     }
 
-    return { success: true, data: book };
+    return { success: true, status: 200, data: book };
   }
 
   removeBook({ bookId }) {
@@ -106,21 +126,21 @@ export class Library {
     );
 
     if (index === -1) {
-      return { success: false, errorCode: 402 };
+      throw new AuthenticationError("Wrong bookId");
     }
 
-    const deletedBook = this.#library.books.splice(index, 1);
+    this.#library.books.splice(index, 1);
 
-    return { success: true, data: deletedBook[0] };
+    return { success: true, status: 204 };
   }
 
   listAllBooks() {
     const books = this.#library.books;
     if (books.length === 0) {
-      return { success: false, errorCode: 404 };
+      throw new NotFoundError("No books available");
     }
 
-    return { success: true, data: books };
+    return { success: true, status: 200, data: books };
   }
 
   listBorrowed({ customerId }) {
@@ -129,16 +149,16 @@ export class Library {
     );
 
     if (customer === undefined) {
-      return { success: false, errorCode: 402 };
+      throw new AuthenticationError("Wrong customerId");
     }
 
     const borrowedBooks = customer.borrowed;
 
     if (borrowedBooks.length === 0) {
-      return { success: false, errorCode: 404 };
+      throw new NotFoundError("No book borrowed");
     }
 
-    return { success: true, data: borrowedBooks };
+    return { success: true, status: 200, data: borrowedBooks };
   }
 
   borrowBook({ customerId, bookId: bId }) {
@@ -149,18 +169,18 @@ export class Library {
     const book = this.#library.books.find((book) => book.bookId === bId);
 
     if (customer === undefined || book === undefined) {
-      return { success: false, errorCode: 402 };
+      throw new AuthenticationError("Wrong customerId or bookId");
     }
 
     const { bookId, title, author, available } = book;
 
     if (available === 0) {
-      return { success: false, errorCode: 403 };
+      throw new ConflictError("Insufficient book copies");
     }
 
     customer.borrowed.push({ bookId, title, author });
     book.available -= 1;
-    return { success: true };
+    return { success: true, status: 204 };
   }
 
   returnBook({ customerId, bookId: bId }) {
@@ -170,7 +190,7 @@ export class Library {
     const book = this.#library.books.find((book) => book.bookId === bId);
 
     if (customer === undefined) {
-      return { success: false, errorCode: 402 };
+      throw new AuthenticationError("Wrong customerId");
     }
 
     const bookIndex = customer.borrowed.findIndex((book) =>
@@ -178,12 +198,11 @@ export class Library {
     );
 
     if (bookIndex === -1) {
-      return { success: false, errorCode: 402 };
+      throw new AuthenticationError("Wrong bookId");
     }
 
-    const returnedBook = customer.borrowed.splice(bookIndex, 1);
-
+    customer.borrowed.splice(bookIndex, 1);
     book.available += 1;
-    return { success: true, data: returnedBook[0] };
+    return { success: true, status: 204 };
   }
 }

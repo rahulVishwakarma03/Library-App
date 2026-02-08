@@ -13,5 +13,14 @@ const requestHandlers = {
 };
 
 export const handleRequest = (library, { command, data }) => {
-  return requestHandlers[command](library, data);
+  try {
+    return requestHandlers[command](library, data);
+  } catch (error) {
+    return {
+      success: false,
+      status: error.status,
+      errorName: error.name,
+      message: error.message,
+    };
+  }
 };

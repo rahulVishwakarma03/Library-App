@@ -18,7 +18,6 @@ const readResponse = async (conn) => {
   const buffer = new Uint8Array(1024);
   const bytes = await conn.read(buffer);
   const response = decoder.decode(buffer.subarray(0, bytes));
-  
   return JSON.parse(response);
 };
 

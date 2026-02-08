@@ -112,9 +112,9 @@
 
 ### TYPES OF ERROR
   * 400 : Validation Error (invalid name,email, password,title ...)
-  * 401 : Authentication Error (wrong login details)
+  * 401 : Authentication Error (wrong credential)
   * 404 : Not Found Error (customerId, bookId)
-  * 409 : Conflict Error (already Exists)
+  * 409 : Conflict Error (already Exists, insufficient copies)
   * 500 : Server Error  (db connection failed)
 
 ### Codes For success

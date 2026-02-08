@@ -20,7 +20,7 @@ const writeResponse = async (conn, response) => {
 const handleConnection = async (conn, library) => {
   const request = await readRequest(conn);
   const response = handleRequest(library, request);
-
+  
   await writeResponse(conn, response);
   conn.close();
 };

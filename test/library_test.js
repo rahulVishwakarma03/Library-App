@@ -1,7 +1,12 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import { Library } from "../src/library.js";
 import { mockRequests } from "../data/mock_requests.js";
+import {
+  AuthenticationError,
+  ConflictError,
+  NotFoundError,
+} from "../src/custom_errors.js";
 
 describe("Library", () => {
   let library;
@@ -20,15 +25,16 @@ describe("Library", () => {
     it("register customer", () => {
       assertEquals(
         library.registerCustomer(registrationDetails),
-        { success: true },
+        { success: true, status: 201 },
       );
     });
 
     it("shouldn't register customer if it's already registered", () => {
       library.registerCustomer(registrationDetails);
-      assertEquals(
-        library.registerCustomer(registrationDetails),
-        { success: false, errorCode: 401 },
+      assertThrows(
+        () => library.registerCustomer(registrationDetails),
+        ConflictError,
+        "Customer already exists",
       );
     });
   });
@@ -38,15 +44,17 @@ describe("Library", () => {
       library.registerCustomer(registrationDetails);
       assertEquals(
         library.loginCustomer(loginDetails),
-        { success: true, data: { customerId: 1 } },
+        { success: true, status: 200, data: { customerId: 1 } },
       );
     });
 
     it("should fail if login details are inValid", () => {
-      assertEquals(
-        library.loginCustomer(loginDetails),
-        { success: false, errorCode: 402 },
-      );
+      library.registerAdmin(registrationDetails),
+        assertThrows(
+          () => library.loginCustomer(loginDetails),
+          AuthenticationError,
+          "Customer login credential mismatched",
+        );
     });
   });
 
@@ -54,15 +62,16 @@ describe("Library", () => {
     it("register admin", () => {
       assertEquals(
         library.registerAdmin(registrationDetails),
-        { success: true },
+        { success: true, status: 201 },
       );
     });
 
     it("shouldn't register admin if it's already registered", () => {
       library.registerAdmin(registrationDetails),
-        assertEquals(
-          library.registerAdmin(registrationDetails),
-          { success: false, errorCode: 401 },
+        assertThrows(
+          () => library.registerAdmin(registrationDetails),
+          ConflictError,
+          "Admin already exists",
         );
     });
   });
@@ -72,14 +81,15 @@ describe("Library", () => {
       library.registerAdmin(registrationDetails);
       assertEquals(
         library.loginAdmin(loginDetails),
-        { success: true, data: { email: loginDetails.email } },
+        { success: true, status: 200, data: { adminId: 1 } },
       );
     });
 
     it("should fail if login details are inValid", () => {
-      assertEquals(
-        library.loginAdmin(loginDetails),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.loginAdmin(loginDetails),
+        AuthenticationError,
+        "Admin login credential mismatched",
       );
     });
   });
@@ -88,15 +98,16 @@ describe("Library", () => {
     it("should add new book if book doesn't exist", () => {
       assertEquals(
         library.addBook(bookDetails),
-        { success: true },
+        { success: true, status: 201, data: { bookId: 1 } },
       );
     });
 
     it("should fail if book already exists", () => {
       library.addBook(bookDetails);
-      assertEquals(
-        library.addBook(bookDetails),
-        { success: false, errorCode: 401 },
+      assertThrows(
+        () => library.addBook(bookDetails),
+        ConflictError,
+        "Book already exists",
       );
     });
   });
@@ -108,15 +119,17 @@ describe("Library", () => {
         library.viewBook({ bookId: 1 }),
         {
           success: true,
+          status: 200,
           data: { ...bookDetails, bookId: 1, available: bookDetails.total },
         },
       );
     });
 
     it("should fail if book doesn't exist", () => {
-      assertEquals(
-        library.viewBook({ bookId: 1 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.viewBook({ bookId: 1 }),
+        NotFoundError,
+        "Book not found",
       );
     });
   });
@@ -128,19 +141,21 @@ describe("Library", () => {
         library.removeBook({ bookId: 1 }),
         {
           success: true,
-          data: { ...bookDetails, bookId: 1, available: bookDetails.total },
+          status: 204,
         },
       );
-      assertEquals(library.viewBook({ bookId: 1 }), {
-        success: false,
-        errorCode: 402,
-      });
+      assertThrows(
+        () => library.viewBook({ bookId: 1 }),
+        NotFoundError,
+        "Book not found",
+      );
     });
 
     it("should fail if book doesn't exist", () => {
-      assertEquals(
-        library.removeBook({ bookId: 1 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.removeBook({ bookId: 1 }),
+        AuthenticationError,
+        "Wrong bookId",
       );
     });
   });
@@ -152,15 +167,17 @@ describe("Library", () => {
         library.listAllBooks(),
         {
           success: true,
+          status: 200,
           data: [{ ...bookDetails, bookId: 1, available: bookDetails.total }],
         },
       );
     });
 
     it("should fail if book doesn't exist", () => {
-      assertEquals(
-        library.listAllBooks(),
-        { success: false, errorCode: 404 },
+      assertThrows(
+        () => library.listAllBooks(),
+        NotFoundError,
+        "No books available",
       );
     });
   });
@@ -174,30 +191,34 @@ describe("Library", () => {
       library.addBook(bookDetails);
       assertEquals(
         library.borrowBook({ customerId: 1, bookId: 1 }),
-        { success: true },
+        { success: true, status: 204 },
       );
     });
 
     it("should fail if book is not available", () => {
       library.addBook({ ...bookDetails, total: 0 });
-      assertEquals(
-        library.borrowBook({ customerId: 1, bookId: 1 }),
-        { success: false, errorCode: 403 },
+      assertThrows(
+        () => library.borrowBook({ customerId: 1, bookId: 1 }),
+        ConflictError,
+        "Insufficient book copies",
       );
     });
 
     it("should fail if customer details is invalid", () => {
-      assertEquals(
-        library.borrowBook({ customerId: 5 }),
-        { success: false, errorCode: 402 },
+      library.addBook(bookDetails);
+      assertThrows(
+        () => library.borrowBook({ customerId: 5, bookId: 1 }),
+        AuthenticationError,
+        "Wrong customerId or bookId",
       );
     });
 
     it("should fail if book details is invalid", () => {
       library.addBook(bookDetails);
-      assertEquals(
-        library.borrowBook({ customerId: 1, bookId: 4 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.borrowBook({ customerId: 1, bookId: 4 }),
+        AuthenticationError,
+        "Wrong customerId or bookId",
       );
     });
   });
@@ -215,6 +236,7 @@ describe("Library", () => {
         library.listBorrowed({ customerId: 1 }),
         {
           success: true,
+          status: 200,
           data: [{
             title: bookDetails.title,
             author: bookDetails.author,
@@ -225,16 +247,18 @@ describe("Library", () => {
     });
 
     it("should fail if customer details is invalid", () => {
-      assertEquals(
-        library.listBorrowed({ customerId: 5 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.listBorrowed({ customerId: 5 }),
+        AuthenticationError,
+        "Wrong customerId",
       );
     });
 
     it("should fail if book doesn't exist", () => {
-      assertEquals(
-        library.listBorrowed({ customerId: 1 }),
-        { success: false, errorCode: 404 },
+      assertThrows(
+        () => library.listBorrowed({ customerId: 1 }),
+        NotFoundError,
+        "No book borrowed",
       );
     });
   });
@@ -251,26 +275,24 @@ describe("Library", () => {
         library.returnBook({ customerId: 1, bookId: 1 }),
         {
           success: true,
-          data: {
-            bookId: 1,
-            title: bookDetails.title,
-            author: bookDetails.author,
-          },
+          status: 204,
         },
       );
     });
 
     it("should fail if customer details is invalid", () => {
-      assertEquals(
-        library.returnBook({ customerId: 5 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.returnBook({ customerId: 5, bookId: 1 }),
+        AuthenticationError,
+        "Wrong customerId",
       );
     });
 
     it("should fail if book details is invalid", () => {
-      assertEquals(
-        library.returnBook({ customerId: 1, bookId: 2 }),
-        { success: false, errorCode: 402 },
+      assertThrows(
+        () => library.returnBook({ customerId: 1, bookId: 2 }),
+        AuthenticationError,
+        "Wrong bookId",
       );
     });
   });
