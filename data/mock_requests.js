@@ -39,6 +39,10 @@ export const mockRequests = {
     command: "listAllBooks",
     data: {},
   },
+  listAllCustomers: {
+    command: "listAllCustomers",
+    data: {},
+  },
   borrowBook: {
     command: "borrowBook",
     data: { customerId: 1, bookId: 1 },

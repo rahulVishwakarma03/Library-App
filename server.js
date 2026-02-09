@@ -1,5 +1,5 @@
 import { Library } from "./src/library.js";
-import { handleRequest } from "./src/request_handlers.js";
+import { handleRequest } from "./src/request_handler.js";
 
 const BUFFER_SIZE = 1024;
 const encoder = new TextEncoder();

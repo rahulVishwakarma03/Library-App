@@ -182,6 +182,28 @@ describe("Library", () => {
     });
   });
 
+  describe("List all Customers", () => {
+    it("should give all customers", () => {
+      library.registerCustomer(registrationDetails);
+      assertEquals(
+        library.listAllCustomers(),
+        {
+          success: true,
+          status: 200,
+          data: [{ ...registrationDetails, customerId: 1, borrowed: [] }],
+        },
+      );
+    });
+
+    it("should fail if no customer available", () => {
+      assertThrows(
+        () => library.listAllCustomers(),
+        NotFoundError,
+        "No customers available",
+      );
+    });
+  });
+
   describe("Borrow Books", () => {
     beforeEach(() => {
       library.registerCustomer(registrationDetails);

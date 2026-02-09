@@ -145,6 +145,15 @@ export class Library {
     return { success: true, status: 200, data: books };
   }
 
+  listAllCustomers() {
+    const customers = this.#library.customers;
+    if (customers.length === 0) {
+      throw new NotFoundError("No customers available");
+    }
+
+    return { success: true, status: 200, data: customers };
+  }
+
   listBorrowed({ customerId }) {
     const customer = this.#findCustomerBy({ customerId });
 

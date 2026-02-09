@@ -8,6 +8,7 @@ const getRequestHandler = (library, command) => {
     viewBook: library.viewBook.bind(library),
     removeBook: library.removeBook.bind(library),
     listAllBooks: library.listAllBooks.bind(library),
+    listAllCustomers: library.listAllCustomers.bind(library),
     borrowBook: library.borrowBook.bind(library),
     listBorrowed: library.listBorrowed.bind(library),
     returnBook: library.returnBook.bind(library),

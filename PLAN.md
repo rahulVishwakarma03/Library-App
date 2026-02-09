@@ -49,10 +49,10 @@
   ✅  -> registerAdmin(name,email, password) // returns {success:true}
   ✅  -> loginAdmin(email, password) // returns {success : true/false}
   ✅  -> listBooks()// returns all books
-    -> listCustomers()// returns all customers
+      -> listCustomers()// returns all customers
   ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
   ✅  -> viewBook(bookId) // return {title, author, total, available}
-     -> updateQuantity(bookId, quantity) // returns {success : true};
+  ✅  -> updateQuantity(bookId, quantity) // returns {success : true};
   ✅  -> deleteBook(bookId) // returns {success : true}
 
 ### In_Memory Structure
@@ -102,13 +102,6 @@
       ...
     }
 
-<!-- ### Error Codes
-
-  * 401 : Already Exists
-  * 402 : invalid given details
-  * 403 : requested book is not available
-  * 404 : No Book available(list is empty) -->
-
 
 ### TYPES OF ERROR
   * 400 : Validation Error (invalid name,email, password,title ...)
@@ -117,7 +110,7 @@
   * 409 : Conflict Error (already Exists, insufficient copies)
   * 500 : Server Error  (db connection failed)
 
-### Codes For success
+### Status Codes For success
   * 200 : mainly used for get(ex : list books, list borrowed) 
   * 201 : mainly used for post(ex : registerCustomer, registerAdmin, addBook) // return the id or object
   * 204 : mainly used for put ( eg : removeBook, updateQuantity); // body is not expected

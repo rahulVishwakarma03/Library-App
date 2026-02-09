@@ -1,7 +1,7 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { Library } from "../src/library.js";
-import { handleRequest } from "../src/request_handlers.js";
+import { handleRequest } from "../src/request_handler.js";
 import { mockRequests } from "../data/mock_requests.js";
 
 describe("Request handler", () => {
@@ -96,6 +96,23 @@ describe("Request handler", () => {
           ...mockRequests.addBook.data,
           bookId: 1,
           available: mockRequests.addBook.data.total,
+        }],
+      },
+    );
+  });
+
+  it("list all customers request", () => {
+    handleRequest(library, mockRequests.registerCustomer);
+
+    assertEquals(
+      handleRequest(library, mockRequests.listAllCustomers),
+      {
+        success: true,
+        status: 200,
+        data: [{
+          ...mockRequests.registerCustomer.data,
+          customerId: 1,
+          borrowed: [],
         }],
       },
     );
