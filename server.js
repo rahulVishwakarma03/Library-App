@@ -8,6 +8,9 @@ const decoder = new TextDecoder();
 const readRequest = async (conn) => {
   const buffer = new Uint8Array(BUFFER_SIZE);
   const bytes = await conn.read(buffer);
+  if (!bytes) {
+    throw new Error("connection interrupted");
+  }
   const request = decoder.decode(buffer.subarray(0, bytes));
 
   return JSON.parse(request);
@@ -18,11 +21,16 @@ const writeResponse = async (conn, response) => {
 };
 
 const handleConnection = async (conn, library) => {
-  const request = await readRequest(conn);
-  const response = handleRequest(library, request);
-  
-  await writeResponse(conn, response);
-  conn.close();
+  while (true) {
+    try {
+      const request = await readRequest(conn);
+      const response = handleRequest(library, request);
+      await writeResponse(conn, response);
+    } catch {
+      conn.close();
+      return;
+    }
+  }
 };
 
 const main = async (port) => {

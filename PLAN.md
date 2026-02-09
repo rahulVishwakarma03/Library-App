@@ -126,3 +126,28 @@
     * NotFoundError extends AppError
     * ConflictError extends AppError
     * ServerError extends AppError
+
+
+### USER INTERFACE
+
+Customer -> register -> Enter name , email, password
+         -> login (Enter email, password)
+                    -> Books -> book1
+                             -> book2 -> borrow
+                                      -> back
+                             -> book3 (disabled when no copy available)
+
+                    -> Reading -> book1
+                               -> book2 -> return
+                                        -> back
+                               -> book3
+                    -> Exit
+
+Admin -> login -> Add new book
+               -> List All books
+               -> Manage Book ->list -> view 
+                                     -> update copies quantity 
+                                     -> Remove book
+                                     -> back
+               -> List All customers
+               -> Exit

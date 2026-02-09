@@ -1,5 +1,6 @@
 import { mockRequests } from "./data/mock_requests.js";
 import { connectToServer, handleUserRequest } from "./src/agent.js";
+import { uiManager } from "./src/user_interface.js";
 
 const HOSTNAME = "127.0.0.1";
 const PORT = 8000;
@@ -7,10 +8,12 @@ const PORT = 8000;
 const main = async (hostname, port) => {
   const conn = await connectToServer(hostname, port);
 
-  const req = mockRequests.listAllBooks;
+  // const req = mockRequests.listAllBooks;
 
-  const response = await handleUserRequest(conn, req);
-  console.log(response);
+  // const response = await handleUserRequest(conn, req);
+  // console.log(response);
+
+  return await uiManager(conn);
 };
 
 await main(HOSTNAME, PORT);
