@@ -11,7 +11,7 @@ const createSelector = async (message, choices) => {
   return await select({ message, choices });
 };
 
-export const handleCustomerReg = async (conn) => {
+const takeRegDetails = async () => {
   const name = await input({ message: "Enter your name : " });
   const email = await input({ message: "Enter your email : " });
   const userPassword = await password({
@@ -19,17 +19,22 @@ export const handleCustomerReg = async (conn) => {
     mask: true,
   });
 
-  const request = {
-    command: "registerCustomer",
-    data: { name, email, password: userPassword },
-  };
+  return { name, email, password: userPassword };
+};
 
-  const response = await handleUserRequest(conn, request);
-  console.log(response);
+export const handleCustomerReg = async () => {
+  const { name, email, password } = await takeRegDetails();
+  const response = await handleUserRequest(
+    "/customer/register",
+    "POST",
+    JSON.stringify({ name, email, password }),
+  );
+  const body = await response.json();
+  console.log(body.message);
   return;
 };
 
-const manageCustomersOperations = async (conn) => {
+const manageCustomersOperations = async () => {
   while (true) {
     const action = await createSelector("Select action : ", [
       "Register",
@@ -39,22 +44,22 @@ const manageCustomersOperations = async (conn) => {
 
     if (action === "Back") return;
     if (action === "Register") {
-      await handleCustomerReg(conn);
+      await handleCustomerReg();
     }
   }
 };
 
-export const uiManager = async (conn) => {
+export const uiManager = async () => {
   while (true) {
     const option = await createSelector("Select your role : ", mainMenuChoices);
     if (option === "exit") return;
 
     if (option === "customer") {
-      await manageCustomersOperations(conn);
+      await manageCustomersOperations();
     }
 
     if (option === "admin") {
-      await handleAdminOperations(conn);
+      await handleAdminOperations();
     }
   }
 };
