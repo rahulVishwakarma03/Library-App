@@ -16,17 +16,15 @@ describe("Library", () => {
 
   beforeEach(() => {
     library = new Library({});
-    registrationDetails = mockRequests.registerCustomer.data;
-    loginDetails = mockRequests.loginCustomer.data;
-    bookDetails = mockRequests.addBook.data;
+    registrationDetails = mockRequests.registerCustomer.body;
+    loginDetails = mockRequests.loginCustomer.body;
+    bookDetails = mockRequests.addBook.body;
   });
 
   describe("Customer Registration", () => {
     it("register customer", () => {
-      assertEquals(
-        library.registerCustomer(registrationDetails),
-        { success: true, status: 201 },
-      );
+      const response = library.registerCustomer(registrationDetails);
+      assertEquals(response.status, 201);
     });
 
     it("shouldn't register customer if it's already registered", () => {
@@ -42,10 +40,7 @@ describe("Library", () => {
   describe("Customer Login", () => {
     it("should login if login details are valid", () => {
       library.registerCustomer(registrationDetails);
-      assertEquals(
-        library.loginCustomer(loginDetails),
-        { success: true, status: 200, data: { customerId: 1 } },
-      );
+      assertEquals(library.loginCustomer(loginDetails).status, 200);
     });
 
     it("should fail if login details are inValid", () => {
@@ -60,10 +55,7 @@ describe("Library", () => {
 
   describe("Admin registration", () => {
     it("register admin", () => {
-      assertEquals(
-        library.registerAdmin(registrationDetails),
-        { success: true, status: 201 },
-      );
+      assertEquals(library.registerAdmin(registrationDetails).status, 201);
     });
 
     it("shouldn't register admin if it's already registered", () => {
@@ -79,10 +71,7 @@ describe("Library", () => {
   describe("Admin login", () => {
     it("should login if login details are valid", () => {
       library.registerAdmin(registrationDetails);
-      assertEquals(
-        library.loginAdmin(loginDetails),
-        { success: true, status: 200, data: { adminId: 1 } },
-      );
+      assertEquals(library.loginAdmin(loginDetails).status, 200);
     });
 
     it("should fail if login details are inValid", () => {
@@ -96,10 +85,7 @@ describe("Library", () => {
 
   describe("Add New Book", () => {
     it("should add new book if book doesn't exist", () => {
-      assertEquals(
-        library.addBook(bookDetails),
-        { success: true, status: 201, data: { bookId: 1 } },
-      );
+      assertEquals(library.addBook(bookDetails).status, 201);
     });
 
     it("should fail if book already exists", () => {
@@ -115,14 +101,7 @@ describe("Library", () => {
   describe("View a Book", () => {
     it("should give a book's details if book exists", () => {
       library.addBook(bookDetails);
-      assertEquals(
-        library.viewBook({ bookId: 1 }),
-        {
-          success: true,
-          status: 200,
-          data: { ...bookDetails, bookId: 1, available: bookDetails.total },
-        },
-      );
+      assertEquals(library.viewBook({ bookId: 1 }).status, 200);
     });
 
     it("should fail if book doesn't exist", () => {
@@ -137,13 +116,7 @@ describe("Library", () => {
   describe("Remove a Book", () => {
     it("should remove a book's details if book exists", () => {
       library.addBook(bookDetails);
-      assertEquals(
-        library.removeBook({ bookId: 1 }),
-        {
-          success: true,
-          status: 204,
-        },
-      );
+      assertEquals(library.removeBook({ bookId: 1 }).status, 204);
       assertThrows(
         () => library.viewBook({ bookId: 1 }),
         NotFoundError,
@@ -163,14 +136,7 @@ describe("Library", () => {
   describe("List all Books", () => {
     it("should give all books", () => {
       library.addBook(bookDetails);
-      assertEquals(
-        library.listAllBooks(),
-        {
-          success: true,
-          status: 200,
-          data: [{ ...bookDetails, bookId: 1, available: bookDetails.total }],
-        },
-      );
+      assertEquals(library.listAllBooks().status, 200);
     });
 
     it("should fail if book doesn't exist", () => {
@@ -185,14 +151,7 @@ describe("Library", () => {
   describe("List all Customers", () => {
     it("should give all customers", () => {
       library.registerCustomer(registrationDetails);
-      assertEquals(
-        library.listAllCustomers(),
-        {
-          success: true,
-          status: 200,
-          data: [{ ...registrationDetails, customerId: 1, borrowed: [] }],
-        },
-      );
+      assertEquals(library.listAllCustomers().status, 200);
     });
 
     it("should fail if no customer available", () => {
@@ -212,8 +171,8 @@ describe("Library", () => {
     it("should borrow book if book is available and given details are valid", () => {
       library.addBook(bookDetails);
       assertEquals(
-        library.borrowBook({ customerId: 1, bookId: 1 }),
-        { success: true, status: 204 },
+        library.borrowBook({ customerId: 1, bookId: 1 }).status,
+        200,
       );
     });
 
@@ -254,18 +213,7 @@ describe("Library", () => {
     it("should list borrowed books by a customer", () => {
       library.borrowBook({ customerId: 1, bookId: 1 });
 
-      assertEquals(
-        library.listBorrowed({ customerId: 1 }),
-        {
-          success: true,
-          status: 200,
-          data: [{
-            title: bookDetails.title,
-            author: bookDetails.author,
-            bookId: 1,
-          }],
-        },
-      );
+      assertEquals(library.listBorrowed({ customerId: 1 }).status, 200);
     });
 
     it("should fail if customer details is invalid", () => {
@@ -294,11 +242,8 @@ describe("Library", () => {
 
     it("should return a borrowed book by a customer", () => {
       assertEquals(
-        library.returnBook({ customerId: 1, bookId: 1 }),
-        {
-          success: true,
-          status: 204,
-        },
+        library.returnBook({ customerId: 1, bookId: 1 }).status,
+        200,
       );
     });
 

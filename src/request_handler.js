@@ -1,32 +1,66 @@
-const getRequestHandler = (library, command) => {
-  const requestHandlers = {
-    registerCustomer: library.registerCustomer.bind(library),
-    registerAdmin: library.registerAdmin.bind(library),
-    loginCustomer: library.loginCustomer.bind(library),
-    loginAdmin: library.loginAdmin.bind(library),
-    addBook: library.addBook.bind(library),
-    viewBook: library.viewBook.bind(library),
-    removeBook: library.removeBook.bind(library),
-    listAllBooks: library.listAllBooks.bind(library),
-    listAllCustomers: library.listAllCustomers.bind(library),
-    borrowBook: library.borrowBook.bind(library),
-    listBorrowed: library.listBorrowed.bind(library),
-    returnBook: library.returnBook.bind(library),
+import { ValidationError } from "./custom_errors.js";
+
+const handlersForGET = {
+  "/listAllBooks": (library) => library.listAllBooks(),
+  "/listAllCustomers": (library) => library.listAllCustomers(),
+};
+
+const handlersForPOST = {
+  "/customer/register": (library, data) => library.registerCustomer(data),
+  "/admin/register": (library, data) => library.registerAdmin(data),
+  "/customer/login": (library, data) => library.loginCustomer(data),
+  "/admin/login": (library, data) => library.loginAdmin(data),
+  "/addBook": (library, data) => library.addBook(data),
+  "/viewBook": (library, data) => library.viewBook(data),
+  "/removeBook": (library, data) => library.removeBook(data),
+  "/borrowBook": (library, data) => library.borrowBook(data),
+  "/listBorrowed": (library, data) => library.listBorrowed(data),
+  "/returnBook": (library, data) => library.returnBook(data),
+};
+
+const createErrorResponse = ({ status, name, message }) => {
+  const body = {
+    success: false,
+    errorName: name,
+    message,
   };
 
-  return requestHandlers[command];
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "content-type": "application/json",
+    },
+  });
 };
 
-export const handleRequest = (library, { command, data }) => {
-  try {
-    const handler = getRequestHandler(library, command);
-    return handler(data);
-  } catch (error) {
-    return {
-      success: false,
-      status: error.status,
-      errorName: error.name,
-      message: error.message,
-    };
+const validateRequest = (method, path) => {
+  const handlers = {
+    "GET": handlersForGET,
+    "POST": handlersForPOST,
+  };
+
+  if (!handlers[method][path]) {
+    throw new ValidationError("Invalid request!");
   }
 };
+
+export const handleRequest = async (library, request) => {
+  const { method, url } = request;
+  const path = new URL(url).pathname;
+
+  try {
+    validateRequest(method, path);
+
+    if (method === "POST") {
+      const data = await request.json();
+      return handlersForPOST[path](library, data);
+    }
+
+    return handlersForGET[path](library);
+  } catch (error) {
+    return createErrorResponse(error);
+  }
+};
+
+export const createRequestHandler = (library) => async (request) =>
+  await handleRequest(library, request);

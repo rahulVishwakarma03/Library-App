@@ -32,10 +32,19 @@ export class Library {
     );
   }
 
+  #createResponse(status, body) {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        "content-type": "application/json",
+      },
+    });
+  }
+
   registerCustomer({ name, email, password }) {
     const customer = this.#findCustomerBy({ email, password });
 
-    if (customer) {
+    if (customer !== undefined) {
       throw new ConflictError("Customer already exists");
     }
 
@@ -46,8 +55,10 @@ export class Library {
       password,
       borrowed: [],
     });
-
-    return { success: true, status: 201 };
+    return this.#createResponse(201, {
+      success: true,
+      message: "Customer Registered Successfully",
+    });
   }
 
   registerAdmin({ name, email, password }) {
@@ -61,22 +72,24 @@ export class Library {
       email,
       password,
     };
-
-    return { success: true, status: 201 };
+    return this.#createResponse(201, {
+      success: true,
+      message: "Admin Registered Successfully",
+    });
   }
 
   loginCustomer({ email, password }) {
     const customer = this.#findCustomerBy({ email, password });
 
-    if (!customer) {
+    if (customer === undefined) {
       throw new AuthenticationError("Customer login credential is wrong");
     }
 
-    return {
+    return this.#createResponse(200, {
       success: true,
-      status: 200,
       data: { customerId: customer.customerId },
-    };
+      message: "Customer loggedIn Successfully",
+    });
   }
 
   loginAdmin({ email, password }) {
@@ -84,7 +97,11 @@ export class Library {
       this.#library.admin;
 
     if (email === orgEmail && password === orgPassword) {
-      return { success: true, status: 200, data: { adminId } };
+      return this.#createResponse(200, {
+        success: true,
+        data: { adminId },
+        message: "Admin loggedIn Successfully",
+      });
     }
 
     throw new AuthenticationError("Admin login credential is wrong");
@@ -93,7 +110,7 @@ export class Library {
   addBook({ title, author, total }) {
     const book = this.#findBookBy({ title, author });
 
-    if (book) {
+    if (book !== undefined) {
       throw new ConflictError("Book already exists");
     }
 
@@ -105,21 +122,23 @@ export class Library {
       available: total,
     });
 
-    return {
+    return this.#createResponse(201, {
       success: true,
-      status: 201,
       data: { bookId: this.#currentBookId },
-    };
+      message: "Book Added successfully",
+    });
   }
 
   viewBook({ bookId }) {
     const book = this.#findBookBy({ bookId });
 
-    if (!book) {
+    if (book === undefined) {
       throw new NotFoundError("Book not found");
     }
-
-    return { success: true, status: 200, data: book };
+    return this.#createResponse(200, {
+      success: true,
+      data: book,
+    });
   }
 
   removeBook({ bookId }) {
@@ -133,7 +152,7 @@ export class Library {
 
     this.#library.books.splice(bookIndex, 1);
 
-    return { success: true, status: 204 };
+    return this.#createResponse(204);
   }
 
   listAllBooks() {
@@ -141,8 +160,10 @@ export class Library {
     if (books.length === 0) {
       throw new NotFoundError("No books available");
     }
-
-    return { success: true, status: 200, data: books };
+    return this.#createResponse(200, {
+      success: true,
+      data: books,
+    });
   }
 
   listAllCustomers() {
@@ -151,7 +172,10 @@ export class Library {
       throw new NotFoundError("No customers available");
     }
 
-    return { success: true, status: 200, data: customers };
+    return this.#createResponse(200, {
+      success: true,
+      data: customers,
+    });
   }
 
   listBorrowed({ customerId }) {
@@ -167,7 +191,10 @@ export class Library {
       throw new NotFoundError("No book borrowed");
     }
 
-    return { success: true, status: 200, data: borrowedBooks };
+    return this.#createResponse(200, {
+      success: true,
+      data: borrowedBooks,
+    });
   }
 
   borrowBook({ customerId, bookId }) {
@@ -187,7 +214,11 @@ export class Library {
 
     customer.borrowed.push({ bookId, title, author });
     book.available -= 1;
-    return { success: true, status: 204 };
+
+    return this.#createResponse(200, {
+      success: true,
+      message: "Book borrowed successfully",
+    });
   }
 
   returnBook({ customerId, bookId }) {
@@ -208,6 +239,11 @@ export class Library {
 
     customer.borrowed.splice(bookIndex, 1);
     book.available += 1;
-    return { success: true, status: 204 };
+
+    return this.#createResponse(200, {
+      success: true,
+      data: { bookId },
+      message: "Book returned successfully",
+    });
   }
 }

@@ -22,6 +22,8 @@ const readResponse = async (conn) => {
 };
 
 export const handleUserRequest = async (conn, req) => {
+
+  
   await sendRequest(conn, req);
   const response = await readResponse(conn);
   return response;

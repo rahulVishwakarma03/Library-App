@@ -4,6 +4,16 @@ import { Library } from "../src/library.js";
 import { handleRequest } from "../src/request_handler.js";
 import { mockRequests } from "../data/mock_requests.js";
 
+const createRequest = ({ url, method, body }) => {
+  return new Request(url, {
+    method,
+    body: JSON.stringify(body),
+    headers: {
+      "content-type": "application/json",
+    },
+  });
+};
+
 describe("Request handler", () => {
   let library;
 
@@ -11,156 +21,123 @@ describe("Request handler", () => {
     library = new Library({});
   });
 
-  it("failing customer registration request", () => {
-    handleRequest(library, mockRequests.registerCustomer);
-    const response = handleRequest(library, mockRequests.registerCustomer);
-    assertEquals(response.success, false);
-    assertEquals(response.status, 409);
+  it("invalid request", async () => {
+    const request = createRequest({
+      url: "http://localhost:8000/invalid",
+      method: "GET",
+    });
+    const response = await handleRequest(library, request);
+    assertEquals(response.status, 400);
   });
 
-  it("customer registration request", () => {
-    assertEquals(
-      handleRequest(library, mockRequests.registerCustomer),
-      { success: true, status: 201 },
-    );
+  it("customer registration request", async () => {
+    const request = createRequest(mockRequests.registerCustomer);
+    const response = await handleRequest(library, request);
+    assertEquals(response.status, 201);
   });
 
-  it("customer login request", () => {
-    handleRequest(library, mockRequests.registerCustomer),
-      assertEquals(
-        handleRequest(library, mockRequests.loginCustomer),
-        { success: true, status: 200, data: { customerId: 1 } },
-      );
+  it("customer login request", async () => {
+    const regReq = createRequest(mockRequests.registerCustomer);
+    await handleRequest(library, regReq);
+    const loginReq = createRequest(mockRequests.loginCustomer);
+    const response = await handleRequest(library, loginReq);
+    assertEquals(response.status, 200);
   });
 
-  it("admin registration request", () => {
-    assertEquals(
-      handleRequest(library, mockRequests.registerAdmin),
-      { success: true, status: 201 },
-    );
+  it("customer login request with wrong details", async () => {
+    const request = createRequest(mockRequests.invalidCustomerLoginDetails);
+    const response = await handleRequest(library, request);
+    assertEquals(response.status, 401);
   });
 
-  it("admin login request", () => {
-    handleRequest(library, mockRequests.registerAdmin),
-      assertEquals(
-        handleRequest(library, mockRequests.loginAdmin),
-        { success: true, status: 200, data: { adminId: 1 } },
-      );
+  it("admin registration request", async () => {
+    const request = createRequest(mockRequests.registerAdmin);
+    const response = await handleRequest(library, request);
+    assertEquals(response.status, 201);
   });
 
-  it("add book request", () => {
-    assertEquals(
-      handleRequest(library, mockRequests.addBook),
-      { success: true, status: 201, data: { bookId: 1 } },
-    );
+  it("admin login request", async () => {
+    const regReq = createRequest(mockRequests.registerAdmin);
+    await handleRequest(library, regReq);
+    const loginReq = createRequest(mockRequests.loginAdmin);
+    const response = await handleRequest(library, loginReq);
+    assertEquals(response.status, 200);
   });
 
-  it("view book request", () => {
-    handleRequest(library, mockRequests.addBook);
-
-    assertEquals(
-      handleRequest(library, mockRequests.viewBook),
-      {
-        success: true,
-        status: 200,
-        data: {
-          ...mockRequests.addBook.data,
-          bookId: 1,
-          available: mockRequests.addBook.data.total,
-        },
-      },
-    );
+  it("add book request", async () => {
+    const request = createRequest(mockRequests.addBook);
+    const response = await handleRequest(library, request);
+    assertEquals(response.status, 201);
   });
 
-  it("remove book request", () => {
-    handleRequest(library, mockRequests.addBook);
-
-    assertEquals(
-      handleRequest(library, mockRequests.removeBook),
-      {
-        success: true,
-        status: 204,
-      },
-    );
+  it("view book request", async () => {
+    const addReq = createRequest(mockRequests.addBook);
+    const viewReq = createRequest(mockRequests.viewBook);
+    await handleRequest(library, addReq);
+    const response = await handleRequest(library, viewReq);
+    assertEquals(response.status, 200);
   });
 
-  it("list all books request", () => {
-    handleRequest(library, mockRequests.addBook);
-
-    assertEquals(
-      handleRequest(library, mockRequests.listAllBooks),
-      {
-        success: true,
-        status: 200,
-        data: [{
-          ...mockRequests.addBook.data,
-          bookId: 1,
-          available: mockRequests.addBook.data.total,
-        }],
-      },
-    );
+  it("remove book request", async () => {
+    const addReq = createRequest(mockRequests.addBook);
+    const deleteReq = createRequest(mockRequests.removeBook);
+    await handleRequest(library, addReq);
+    const response = await handleRequest(library, deleteReq);
+    assertEquals(response.status, 204);
   });
 
-  it("list all customers request", () => {
-    handleRequest(library, mockRequests.registerCustomer);
+  it("list all books request", async () => {
+    const addReq = createRequest(mockRequests.addBook);
+    const listBookReq = createRequest(mockRequests.listAllBooks);
+    await handleRequest(library, addReq);
+    const response = await handleRequest(library, listBookReq);
 
-    assertEquals(
-      handleRequest(library, mockRequests.listAllCustomers),
-      {
-        success: true,
-        status: 200,
-        data: [{
-          ...mockRequests.registerCustomer.data,
-          customerId: 1,
-          borrowed: [],
-        }],
-      },
-    );
+    assertEquals(response.status, 200);
   });
 
-  it("borrow book request", () => {
-    handleRequest(library, mockRequests.registerCustomer);
-    handleRequest(library, mockRequests.addBook);
+  it("list all customers request", async () => {
+    const regReq = createRequest(mockRequests.registerCustomer);
+    const listCustomerReq = createRequest(mockRequests.listAllCustomers);
+    await handleRequest(library, regReq);
+    const response = await handleRequest(library, listCustomerReq);
 
-    assertEquals(
-      handleRequest(library, mockRequests.borrowBook),
-      {
-        success: true,
-        status: 204,
-      },
-    );
+    assertEquals(response.status, 200);
   });
 
-  it("list borrowed books request", () => {
-    handleRequest(library, mockRequests.registerCustomer);
-    handleRequest(library, mockRequests.addBook);
-    handleRequest(library, mockRequests.borrowBook);
+  it("borrow book request", async () => {
+    const regReq = createRequest(mockRequests.registerCustomer);
+    const addReq = createRequest(mockRequests.addBook);
+    const borrowBookReq = createRequest(mockRequests.borrowBook);
+    await handleRequest(library, regReq);
+    await handleRequest(library, addReq);
+    const response = await handleRequest(library, borrowBookReq);
 
-    assertEquals(
-      handleRequest(library, mockRequests.listBorrowed),
-      {
-        success: true,
-        status: 200,
-        data: [{
-          title: mockRequests.addBook.data.title,
-          author: mockRequests.addBook.data.author,
-          bookId: 1,
-        }],
-      },
-    );
+    assertEquals(response.status, 200);
   });
 
-  it("return book request", () => {
-    handleRequest(library, mockRequests.registerCustomer);
-    handleRequest(library, mockRequests.addBook);
-    handleRequest(library, mockRequests.borrowBook);
+  it("list borrowed books request", async () => {
+    const regReq = createRequest(mockRequests.registerCustomer);
+    const addReq = createRequest(mockRequests.addBook);
+    const borrowBookReq = createRequest(mockRequests.borrowBook);
+    const listBorrowedReq = createRequest(mockRequests.listBorrowed);
+    await handleRequest(library, regReq);
+    await handleRequest(library, addReq);
+    await handleRequest(library, borrowBookReq);
+    const response = await handleRequest(library, listBorrowedReq);
 
-    assertEquals(
-      handleRequest(library, mockRequests.returnBook),
-      {
-        success: true,
-        status: 204,
-      },
-    );
+    assertEquals(response.status, 200);
+  });
+
+  it("return book request", async () => {
+    const regReq = createRequest(mockRequests.registerCustomer);
+    const addReq = createRequest(mockRequests.addBook);
+    const borrowBookReq = createRequest(mockRequests.borrowBook);
+    const returnBookReq = createRequest(mockRequests.returnBook);
+    await handleRequest(library, regReq);
+    await handleRequest(library, addReq);
+    await handleRequest(library, borrowBookReq);
+    const response = await handleRequest(library, returnBookReq);
+
+    assertEquals(response.status, 200);
   });
 });

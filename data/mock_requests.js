@@ -1,58 +1,67 @@
+const URL = "http://localhost:8000";
+
 export const mockRequests = {
   registerCustomer: {
-    command: "registerCustomer",
-    data: { name: "abc", email: "abc@gmail.com", password: "1234" },
+    url: URL + "/customer/register",
+    method: "POST",
+    body: { name: "abc", email: "abc@gmail.com", password: "1234" },
   },
   registerAdmin: {
-    command: "registerAdmin",
-    data: { name: "abc", email: "abc@gmail.com", password: "1234" },
+    url: URL + "/admin/register",
+    method: "POST",
+    body: { name: "abc", email: "abc@gmail.com", password: "1234" },
   },
   loginCustomer: {
-    command: "loginCustomer",
-    data: { email: "abc@gmail.com", password: "1234" },
+    url: URL + "/customer/login",
+    method: "POST",
+    body: { email: "abc@gmail.com", password: "1234" },
   },
   invalidCustomerLoginDetails: {
-    command: "loginCustomer",
-    data: { email: "abc12@gmail.com", password: "1234" },
+    url: URL + "/customer/login",
+    method: "POST",
+    body: { email: "abc12@gmail.com", password: "1234" },
   },
   loginAdmin: {
-    command: "loginAdmin",
-    data: { email: "abc@gmail.com", password: "1234" },
-  },
-  invalidAdminLoginDetails: {
-    command: "loginAdmin",
-    data: { email: "abc12@gmail.com", password: "1234" },
+    url: URL + "/admin/login",
+    method: "POST",
+    body: { email: "abc@gmail.com", password: "1234" },
   },
   addBook: {
-    command: "addBook",
-    data: { title: "Let Us C", author: "Yaswant Kanetkar", total: 5 },
+    url: URL + "/addBook",
+    method: "POST",
+    body: { title: "Let Us C", author: "Yaswant Kanetkar", total: 5 },
   },
   viewBook: {
-    command: "viewBook",
-    data: { bookId: 1 },
+    url: URL + "/viewBook",
+    method: "POST",
+    body: { bookId: 1 },
   },
   removeBook: {
-    command: "removeBook",
-    data: { bookId: 1 },
+    url: URL + "/removeBook",
+    method: "POST",
+    body: { bookId: 1 },
   },
   listAllBooks: {
-    command: "listAllBooks",
-    data: {},
+    url: URL + "/listAllBooks",
+    method: "GET",
   },
   listAllCustomers: {
-    command: "listAllCustomers",
-    data: {},
+    url: URL + "/listAllCustomers",
+    method: "GET",
   },
   borrowBook: {
-    command: "borrowBook",
-    data: { customerId: 1, bookId: 1 },
+    url: URL + "/borrowBook",
+    method: "POST",
+    body: { customerId: 1, bookId: 1 },
   },
   listBorrowed: {
-    command: "listBorrowed",
-    data: { customerId: 1 },
+    url: URL + "/listBorrowed",
+    method: "POST",
+    body: { customerId: 1 },
   },
   returnBook: {
-    command: "returnBook",
-    data: { customerId: 1, bookId: 1 },
+    url: URL + "/returnBook",
+    method: "POST",
+    body: { customerId: 1, bookId: 1 },
   },
 };

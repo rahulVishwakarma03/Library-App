@@ -111,7 +111,7 @@
   * 500 : Server Error  (db connection failed)
 
 ### Status Codes For success
-  * 200 : mainly used for get(ex : list books, list borrowed) 
+  * 200 : mainly used for get(ex : list books, list borrowed, borrow, return) 
   * 201 : mainly used for post(ex : registerCustomer, registerAdmin, addBook) // return the id or object
   * 204 : mainly used for put ( eg : removeBook, updateQuantity); // body is not expected
 
