@@ -24,4 +24,3 @@
     * sends the response to the agent
     * agent handles the response
     * display response to the customer
-

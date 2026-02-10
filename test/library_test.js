@@ -6,6 +6,7 @@ import {
   AuthenticationError,
   ConflictError,
   NotFoundError,
+  ValidationError,
 } from "../src/custom_errors.js";
 
 describe("Library", () => {
@@ -48,7 +49,7 @@ describe("Library", () => {
         assertThrows(
           () => library.loginCustomer(loginDetails),
           AuthenticationError,
-          "Customer login credential is wrong",
+          "Wrong login credential",
         );
     });
   });
@@ -78,7 +79,7 @@ describe("Library", () => {
       assertThrows(
         () => library.loginAdmin(loginDetails),
         AuthenticationError,
-        "Admin login credential is wrong",
+        "Wrong login credential",
       );
     });
   });
@@ -94,6 +95,47 @@ describe("Library", () => {
         () => library.addBook(bookDetails),
         ConflictError,
         "Book already exists",
+      );
+    });
+
+    it("should fail if total book copies is zero", () => {
+      assertThrows(
+        () => library.addBook({ ...bookDetails, total: 0 }),
+        ValidationError,
+        "Total can not be zero",
+      );
+    });
+  });
+
+  describe("Update Book copies quantity", () => {
+    it("should update quantity", () => {
+      library.addBook(bookDetails);
+      assertEquals(
+        library.updateQuantity({ bookId: 1, quantity: 2 }).status,
+        204,
+      );
+    });
+
+    it("should fail if quantity is invalid", () => {
+      library.addBook(bookDetails);
+      assertThrows(
+        () => library.updateQuantity({ bookId: 1, quantity: -10 }),
+        ValidationError,
+        "Invalid quantity",
+      );
+
+      assertThrows(
+        () => library.updateQuantity({ bookId: 1, quantity: 2.4 }),
+        ValidationError,
+        "Invalid quantity",
+      );
+    });
+
+    it("should fail if bookId is wrong", () => {
+      assertThrows(
+        () => library.updateQuantity({ bookId: 2 }),
+        AuthenticationError,
+        "Wrong bookId",
       );
     });
   });
@@ -129,6 +171,17 @@ describe("Library", () => {
         () => library.removeBook({ bookId: 1 }),
         AuthenticationError,
         "Wrong bookId",
+      );
+    });
+
+    it("should fail if book is borrowed", () => {
+      library.registerCustomer(registrationDetails);
+      library.addBook(bookDetails);
+      library.borrowBook({ customerId: 1, bookId: 1 });
+      assertThrows(
+        () => library.removeBook({ bookId: 1 }),
+        ConflictError,
+        "Cannot remove the book",
       );
     });
   });
@@ -177,7 +230,8 @@ describe("Library", () => {
     });
 
     it("should fail if book is not available", () => {
-      library.addBook({ ...bookDetails, total: 0 });
+      library.addBook({ ...bookDetails, total: 1 });
+      library.borrowBook({ customerId: 1, bookId: 1 });
       assertThrows(
         () => library.borrowBook({ customerId: 1, bookId: 1 }),
         ConflictError,

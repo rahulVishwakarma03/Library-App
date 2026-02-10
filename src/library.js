@@ -2,6 +2,7 @@ import {
   AuthenticationError,
   ConflictError,
   NotFoundError,
+  ValidationError,
 } from "./custom_errors.js";
 
 export class Library {
@@ -81,7 +82,7 @@ export class Library {
   loginCustomer({ email, password }) {
     const customer = this.#findCustomerBy({ email, password });
     if (customer === undefined) {
-      throw new AuthenticationError("Customer login credential is wrong");
+      throw new AuthenticationError("Wrong login credential");
     }
 
     return this.#createResponse(200, {
@@ -103,7 +104,7 @@ export class Library {
       });
     }
 
-    throw new AuthenticationError("Admin login credential is wrong");
+    throw new AuthenticationError("Wrong login credential");
   }
 
   addBook({ title, author, total }) {
@@ -111,6 +112,10 @@ export class Library {
 
     if (book !== undefined) {
       throw new ConflictError("Book already exists");
+    }
+
+    if (total === 0) {
+      throw new ValidationError("Total can not be zero!");
     }
 
     this.#library.books.push({
@@ -126,6 +131,23 @@ export class Library {
       data: { bookId: this.#currentBookId },
       message: "Book Added successfully",
     });
+  }
+
+  updateQuantity({ bookId, quantity }) {
+    const book = this.#findBookBy({ bookId });
+
+    if (book === undefined) {
+      throw new AuthenticationError("Wrong bookId");
+    }
+
+    if (!Number.isInteger(quantity) || (book.available + quantity < 0)) {
+      throw new ValidationError("Invalid quantity");
+    }
+
+    book.available += quantity;
+    book.total += quantity;
+
+    return this.#createResponse(204);
   }
 
   viewBook({ bookId }) {
@@ -147,6 +169,14 @@ export class Library {
 
     if (bookIndex === -1) {
       throw new AuthenticationError("Wrong bookId");
+    }
+
+    const book = this.#library.books[bookIndex];
+
+    if (book.total !== book.available) {
+      throw new ConflictError(
+        "Cannot remove the book. Book is borrowed by the customer",
+      );
     }
 
     this.#library.books.splice(bookIndex, 1);

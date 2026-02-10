@@ -31,6 +31,11 @@ export const mockRequests = {
     method: "POST",
     body: { title: "Let Us C", author: "Yaswant Kanetkar", total: 5 },
   },
+  updateQuantity: {
+    url: URL + "/updateQuantity",
+    method: "POST",
+    body: { bookId: 1, quantity: 4 },
+  },
   viewBook: {
     url: URL + "/viewBook",
     method: "POST",

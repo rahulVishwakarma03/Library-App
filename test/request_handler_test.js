@@ -70,6 +70,14 @@ describe("Request handler", () => {
     assertEquals(response.status, 201);
   });
 
+  it("update quantity request", async () => {
+    const addBookReq = createRequest(mockRequests.addBook);
+    const updateReq = createRequest(mockRequests.updateQuantity);
+    await handleRequest(library, addBookReq);
+    const response = await handleRequest(library, updateReq);
+    assertEquals(response.status, 204);
+  });
+
   it("view book request", async () => {
     const addReq = createRequest(mockRequests.addBook);
     const viewReq = createRequest(mockRequests.viewBook);

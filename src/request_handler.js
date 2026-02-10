@@ -11,6 +11,7 @@ const handlersForPOST = {
   "/customer/login": (library, data) => library.loginCustomer(data),
   "/admin/login": (library, data) => library.loginAdmin(data),
   "/addBook": (library, data) => library.addBook(data),
+  "/updateQuantity": (library, data) => library.updateQuantity(data),
   "/viewBook": (library, data) => library.viewBook(data),
   "/removeBook": (library, data) => library.removeBook(data),
   "/borrowBook": (library, data) => library.borrowBook(data),
