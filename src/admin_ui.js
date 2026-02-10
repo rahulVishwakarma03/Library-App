@@ -1,6 +1,7 @@
 import { input } from "@inquirer/prompts";
 import {
   createSelector,
+  handleBookSelection,
   handleLogin,
   handleRegistration,
   log,
@@ -10,6 +11,13 @@ const adminMenuChoices = [
   { name: "Add Book", value: "addBook" },
   { name: "List Books", value: "listBooks" },
   { name: "Manage Book", value: "manageBook" },
+  { name: "Back", value: "back" },
+];
+
+const booksMenuChoices = [
+  { name: "View Book", value: "viewBook" },
+  { name: "Remove Books", value: "removeBook" },
+  { name: "Update Quantity", value: "updateQuantity" },
   { name: "Back", value: "back" },
 ];
 
@@ -33,7 +41,55 @@ const listBooks = async (handler) => {
   log(body.message);
 };
 
-const manageBook = async (handler) => {};
+const viewBook = async (handler, bookId) => {
+  const response = await handler("/viewBook", "POST", { bookId });
+  const body = await response.json();
+
+  if (response.status === 200) {
+    console.table(body.data);
+    return;
+  }
+
+  log(body.message);
+};
+
+const removeBook = async (handler, bookId) => {
+  const response = await handler("/removeBook", "POST", { bookId });
+
+  if (response.status === 204) {
+    log("Book removed successfully!");
+  }
+};
+
+const handleBookOperationsMenu = async (handler, bookId) => {
+  while (true) {
+    const action = await createSelector("Select action : ", booksMenuChoices);
+
+    if (action === "back") {
+      return;
+    }
+
+    if (action === "removeBook") {
+      return await removeBook(handler, bookId);
+    }
+
+    await ADMIN_ACTION_MAPPER[action](handler, bookId);
+  }
+};
+
+const manageBook = async (handler) => {
+  const response = await handler("/listAllBooks", "GET");
+  const body = await response.json();
+
+  if (response.status === 200) {
+    const books = body.data.map(({ bookId, title }) => ({ bookId, title }));
+
+    const bookId = await handleBookSelection(books);
+    return await handleBookOperationsMenu(handler, bookId);
+  }
+
+  log(body.message);
+};
 
 const addBook = async (handler) => {
   const book = await takeBookInfo();
@@ -56,6 +112,8 @@ const ADMIN_ACTION_MAPPER = {
   "addBook": addBook,
   "listBooks": listBooks,
   "manageBook": manageBook,
+  "viewBook": viewBook,
+  "updateQuantity": () => {},
 };
 
 const manageAdminMenu = async (handler) => {

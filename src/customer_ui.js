@@ -78,7 +78,7 @@ const createBooksChoices = (books) =>
     disabled: available === 0,
   }));
 
-const handleBookSelection = async (books) => {
+export const handleBookSelection = async (books) => {
   const choices = createBooksChoices(books);
   const bookId = await createSelector("Select a book : ", choices);
 

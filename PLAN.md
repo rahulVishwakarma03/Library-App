@@ -52,7 +52,7 @@
       -> listCustomers()// returns all customers
   ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
   ✅  -> viewBook(bookId) // return {title, author, total, available}
-  ✅  -> updateQuantity(bookId, quantity) // returns {success : true};
+      -> updateQuantity(bookId, quantity) // returns {success : true};
   ✅  -> deleteBook(bookId) // returns {success : true}
 
 ### In_Memory Structure
