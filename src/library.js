@@ -42,7 +42,7 @@ export class Library {
   }
 
   registerCustomer({ name, email, password }) {
-    const customer = this.#findCustomerBy({ email, password });
+    const customer = this.#library.customers.find((el) => el.email === email);
 
     if (customer !== undefined) {
       throw new ConflictError("Customer already exists");
@@ -80,7 +80,6 @@ export class Library {
 
   loginCustomer({ email, password }) {
     const customer = this.#findCustomerBy({ email, password });
-
     if (customer === undefined) {
       throw new AuthenticationError("Customer login credential is wrong");
     }

@@ -1,27 +1,25 @@
 import { input, password, select } from "@inquirer/prompts";
-import { handleUserRequest } from "../src/agent.js";
-
-const createListsChoices = async (handler, path) => {
-  const response = await handler(
-    path,
-    "GET",
-  );
-  books = await response.json();
-  const choices = books.map(({ bookId, title, available }) => ({
-    name: title,
-    value: bookId,
-    disabled: !available,
-  }));
-
-  return choices;
-};
 
 const log = (message) => {
   console.log(`\n${message}\n`);
 };
 
+const createBooksChoices = (books) =>
+  books.map(({ bookId, title, available }) => ({
+    name: title,
+    value: bookId,
+    disabled: available === 0,
+  }));
+
 const createSelector = async (message, choices) => {
   return await select({ message, choices });
+};
+
+const handleBookSelection = async (books) => {
+  const choices = createBooksChoices(books);
+  const bookId = await createSelector("Select a book : ", choices);
+
+  return bookId;
 };
 
 const takeRegDetails = async () => {
@@ -50,31 +48,35 @@ export const handleCustomerReg = async (handler) => {
   const response = await handler(
     "/customer/register",
     "POST",
-    JSON.stringify({ name, email, password }),
+    { name, email, password },
   );
+
   const body = await response.json();
   log(body.message);
-  return;
 };
 
 export const handleCustomerLogin = async (handler) => {
   const { email, password } = await takeLoginDetails();
+
   const response = await handler(
     "/customer/login",
     "POST",
-    JSON.stringify({ email, password }),
+    { email, password },
   );
+
   const body = await response.json();
+  const customerId = body.data.customerId;
   log(body.message);
-  return body.customerId;
+
+  if (customerId === undefined) return;
+  return await handleCustomerMenu(handler, customerId);
 };
 
-const handleBookBorrows = async (handler, customerId) => {
-  const choices = createListsChoices(handler, "/listAllBooks");
-  const bookId = await createSelector("Select a book : ", choices);
+const handleBookBorrows = async (handler, customerId, bookId) => {
   const action = await createSelector("Select action : ", ["Borrow", "Back"]);
 
   if (action === "Back") return;
+
   const response = await handler("/borrowBook", "POST", {
     customerId,
     bookId,
@@ -85,7 +87,47 @@ const handleBookBorrows = async (handler, customerId) => {
   return;
 };
 
-const handleCustomersOperations = async (handler, customerId) => {
+const handleBookReturns = async (handler, customerId, bookId) => {
+  const action = await createSelector("Select action : ", ["Return", "Back"]);
+
+  if (action === "Back") return;
+
+  const response = await handler("/returnBook", "POST", {
+    customerId,
+    bookId,
+  });
+
+  const data = await response.json();
+  log(data.message);
+  return;
+};
+
+const manageAvailableBooks = async (handler, customerId) => {
+  const response = await handler("/listAllBooks", "GET");
+  const body = await response.json();
+
+  if (response.status === 200) {
+    const bookId = await handleBookSelection(body.data);
+    await handleBookBorrows(handler, customerId, bookId);
+    return;
+  }
+
+  log(body.message);
+};
+
+const manageBorrowedBooks = async (handler, customerId) => {
+  const response = await handler("/listBorrowed", "POST", { customerId });
+  const body = await response.json();
+
+  if (response.status === 200) {
+    const bookId = await handleBookSelection(body.data);
+    await handleBookReturns(handler, customerId, bookId);
+    return;
+  }
+  log(body.message);
+};
+
+const handleCustomerMenu = async (handler, customerId) => {
   while (true) {
     const action = await createSelector("Select action : ", [
       "Books",
@@ -93,12 +135,15 @@ const handleCustomersOperations = async (handler, customerId) => {
       "Back",
     ]);
 
-    if (action === "Back") return;
-    if (action === "Books") {
-      await handleBookBorrows(handler, customerId);
-    }
-    if (action === "Borrowed") {
-      await handleBookReturns(handler, customerId);
+    switch (action) {
+      case "Books":
+        await manageAvailableBooks(handler, customerId);
+        break;
+      case "Borrowed":
+        await manageBorrowedBooks(handler, customerId);
+        break;
+      case "Back":
+        return;
     }
   }
 };
@@ -116,8 +161,7 @@ const manageCustomer = async (handler) => {
       await handleCustomerReg(handler);
     }
     if (action === "Login") {
-      const customerId = await handleCustomerLogin(handler);
-      // await handleCustomersOperations(handler, customerId);
+      await handleCustomerLogin(handler);
     }
   }
 };

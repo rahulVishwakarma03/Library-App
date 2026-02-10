@@ -52,10 +52,13 @@ export const handleRequest = async (library, request) => {
     validateRequest(method, path);
 
     if (method === "POST") {
-      const data = await request.json();
-      return handlersForPOST[path](library, data);
+      const body = await request.json();
+      console.log({ method, url, body });
+
+      return handlersForPOST[path](library, body);
     }
 
+    console.log({ method, url });
     return handlersForGET[path](library);
   } catch (error) {
     return createErrorResponse(error);
