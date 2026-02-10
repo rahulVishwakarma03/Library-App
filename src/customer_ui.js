@@ -4,25 +4,11 @@ const log = (message) => {
   console.log(`\n${message}\n`);
 };
 
-const createBooksChoices = (books) =>
-  books.map(({ bookId, title, available }) => ({
-    name: title,
-    value: bookId,
-    disabled: available === 0,
-  }));
-
-const createSelector = async (message, choices) => {
+export const createSelector = async (message, choices) => {
   return await select({ message, choices });
 };
 
-const handleBookSelection = async (books) => {
-  const choices = createBooksChoices(books);
-  const bookId = await createSelector("Select a book : ", choices);
-
-  return bookId;
-};
-
-const takeRegDetails = async () => {
+export const takeRegDetails = async () => {
   const name = await input({ message: "Enter your name : " });
   const email = await input({ message: "Enter your email : " });
   const userPassword = await password({
@@ -33,7 +19,7 @@ const takeRegDetails = async () => {
   return { name, email, password: userPassword };
 };
 
-const takeLoginDetails = async () => {
+export const takeLoginDetails = async () => {
   const email = await input({ message: "Enter your email : " });
   const userPassword = await password({
     message: "Enter your password : ",
@@ -43,33 +29,16 @@ const takeLoginDetails = async () => {
   return { email, password: userPassword };
 };
 
-export const handleCustomerReg = async (handler) => {
+export const handleRegistration = async (handler, path) => {
   const { name, email, password } = await takeRegDetails();
   const response = await handler(
-    "/customer/register",
+    path,
     "POST",
     { name, email, password },
   );
 
   const body = await response.json();
   log(body.message);
-};
-
-export const handleCustomerLogin = async (handler) => {
-  const { email, password } = await takeLoginDetails();
-
-  const response = await handler(
-    "/customer/login",
-    "POST",
-    { email, password },
-  );
-
-  const body = await response.json();
-  const customerId = body.data.customerId;
-  log(body.message);
-
-  if (customerId === undefined) return;
-  return await handleCustomerMenu(handler, customerId);
 };
 
 const handleBookBorrows = async (handler, customerId, bookId) => {
@@ -102,6 +71,20 @@ const handleBookReturns = async (handler, customerId, bookId) => {
   return;
 };
 
+const createBooksChoices = (books) =>
+  books.map(({ bookId, title, available }) => ({
+    name: title,
+    value: bookId,
+    disabled: available === 0,
+  }));
+
+const handleBookSelection = async (books) => {
+  const choices = createBooksChoices(books);
+  const bookId = await createSelector("Select a book : ", choices);
+
+  return bookId;
+};
+
 const manageAvailableBooks = async (handler, customerId) => {
   const response = await handler("/listAllBooks", "GET");
   const body = await response.json();
@@ -124,59 +107,62 @@ const manageBorrowedBooks = async (handler, customerId) => {
     await handleBookReturns(handler, customerId, bookId);
     return;
   }
+
   log(body.message);
 };
 
-const handleCustomerMenu = async (handler, customerId) => {
+const manageCustomerMenu = async (handler, customerId) => {
   while (true) {
-    const action = await createSelector("Select action : ", [
-      "Books",
-      "Borrowed",
-      "Back",
-    ]);
+    const action = await createSelector(
+      "Select action : ",
+      ["Books", "Borrowed", "Back"],
+    );
 
-    switch (action) {
-      case "Books":
-        await manageAvailableBooks(handler, customerId);
-        break;
-      case "Borrowed":
-        await manageBorrowedBooks(handler, customerId);
-        break;
-      case "Back":
-        return;
+    if (action === "Books") {
+      await manageAvailableBooks(handler, customerId);
+    }
+    if (action === "Borrowed") {
+      await manageBorrowedBooks(handler, customerId);
+    }
+    if (action === "Back") {
+      return;
     }
   }
 };
 
-const manageCustomer = async (handler) => {
+export const handleLogin = async (handler, path, onLogin) => {
+  const { email, password } = await takeLoginDetails();
+
+  const response = await handler(
+    path,
+    "POST",
+    { email, password },
+  );
+
+  const body = await response.json();
+  log(body.message);
+
+  if (response.status === 200) {
+    const customerId = body.data.customerId;
+    return await onLogin(handler, customerId);
+  }
+};
+
+export const manageCustomer = async (handler) => {
   while (true) {
-    const action = await createSelector("Select action : ", [
-      "Register",
-      "Login",
-      "Back",
-    ]);
+    const action = await createSelector(
+      "Select action : ",
+      ["Register", "Login", "Back"],
+    );
 
     if (action === "Back") return;
+
     if (action === "Register") {
-      await handleCustomerReg(handler);
+      await handleRegistration(handler, "/customer/register");
     }
+
     if (action === "Login") {
-      await handleCustomerLogin(handler);
-    }
-  }
-};
-
-export const uiManager = async (handler) => {
-  while (true) {
-    const option = await createSelector("Select your role : ", [
-      "Customer",
-      "Admin",
-      "Exit",
-    ]);
-    if (option === "Exit") return;
-
-    if (option === "Customer") {
-      await manageCustomer(handler);
+      await handleLogin(handler, "/customer/login", manageCustomerMenu);
     }
   }
 };
