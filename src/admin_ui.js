@@ -21,7 +21,18 @@ const takeBookInfo = async () => {
   return { title, author, total };
 };
 
-const listBooks = async (handler) => {};
+const listBooks = async (handler) => {
+  const response = await handler("/listAllBooks", "GET");
+  const body = await response.json();
+
+  if (response.status === 200) {
+    console.table(body.data);
+    return;
+  }
+
+  log(body.message);
+};
+
 const manageBook = async (handler) => {};
 
 const addBook = async (handler) => {
