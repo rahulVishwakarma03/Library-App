@@ -1,6 +1,6 @@
 import { input, password, select } from "@inquirer/prompts";
 
-const log = (message) => {
+export const log = (message) => {
   console.log(`\n${message}\n`);
 };
 
@@ -8,7 +8,7 @@ export const createSelector = async (message, choices) => {
   return await select({ message, choices });
 };
 
-export const takeRegDetails = async () => {
+export const takeRegistrationInfo = async () => {
   const name = await input({ message: "Enter your name : " });
   const email = await input({ message: "Enter your email : " });
   const userPassword = await password({
@@ -19,7 +19,7 @@ export const takeRegDetails = async () => {
   return { name, email, password: userPassword };
 };
 
-export const takeLoginDetails = async () => {
+export const takeLoginInfo = async () => {
   const email = await input({ message: "Enter your email : " });
   const userPassword = await password({
     message: "Enter your password : ",
@@ -30,18 +30,18 @@ export const takeLoginDetails = async () => {
 };
 
 export const handleRegistration = async (handler, path) => {
-  const { name, email, password } = await takeRegDetails();
+  const registrationInfo = await takeRegistrationInfo();
   const response = await handler(
     path,
     "POST",
-    { name, email, password },
+    registrationInfo,
   );
 
   const body = await response.json();
   log(body.message);
 };
 
-const handleBookBorrows = async (handler, customerId, bookId) => {
+const handleBorrowBookMenu = async (handler, customerId, bookId) => {
   const action = await createSelector("Select action : ", ["Borrow", "Back"]);
 
   if (action === "Back") return;
@@ -56,7 +56,7 @@ const handleBookBorrows = async (handler, customerId, bookId) => {
   return;
 };
 
-const handleBookReturns = async (handler, customerId, bookId) => {
+const handleReturnBookMenu = async (handler, customerId, bookId) => {
   const action = await createSelector("Select action : ", ["Return", "Back"]);
 
   if (action === "Back") return;
@@ -91,7 +91,7 @@ const manageAvailableBooks = async (handler, customerId) => {
 
   if (response.status === 200) {
     const bookId = await handleBookSelection(body.data);
-    await handleBookBorrows(handler, customerId, bookId);
+    await handleBorrowBookMenu(handler, customerId, bookId);
     return;
   }
 
@@ -104,11 +104,22 @@ const manageBorrowedBooks = async (handler, customerId) => {
 
   if (response.status === 200) {
     const bookId = await handleBookSelection(body.data);
-    await handleBookReturns(handler, customerId, bookId);
+    await handleReturnBookMenu(handler, customerId, bookId);
     return;
   }
 
   log(body.message);
+};
+
+const CUSTOMER_ACTION_MAPPER = {
+  "Register": async (handler) =>
+    await handleRegistration(handler, "/customer/register"),
+  "Login": async (handler, onLogin) =>
+    await handleLogin(handler, "/customer/login", onLogin),
+  "Books": async (handler, customerId) =>
+    await manageAvailableBooks(handler, customerId),
+  "Borrowed": async (handler, customerId) =>
+    await manageBorrowedBooks(handler, customerId),
 };
 
 const manageCustomerMenu = async (handler, customerId) => {
@@ -118,25 +129,21 @@ const manageCustomerMenu = async (handler, customerId) => {
       ["Books", "Borrowed", "Back"],
     );
 
-    if (action === "Books") {
-      await manageAvailableBooks(handler, customerId);
-    }
-    if (action === "Borrowed") {
-      await manageBorrowedBooks(handler, customerId);
-    }
     if (action === "Back") {
       return;
     }
+
+    await CUSTOMER_ACTION_MAPPER[action](handler, customerId);
   }
 };
 
 export const handleLogin = async (handler, path, onLogin) => {
-  const { email, password } = await takeLoginDetails();
+  const loginInfo = await takeLoginInfo();
 
   const response = await handler(
     path,
     "POST",
-    { email, password },
+    loginInfo,
   );
 
   const body = await response.json();
@@ -157,12 +164,6 @@ export const manageCustomer = async (handler) => {
 
     if (action === "Back") return;
 
-    if (action === "Register") {
-      await handleRegistration(handler, "/customer/register");
-    }
-
-    if (action === "Login") {
-      await handleLogin(handler, "/customer/login", manageCustomerMenu);
-    }
+    await CUSTOMER_ACTION_MAPPER[action](handler, manageCustomerMenu);
   }
 };
