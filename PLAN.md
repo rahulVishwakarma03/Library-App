@@ -52,7 +52,7 @@
       -> listCustomers()// returns all customers
   ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
   ✅  -> viewBook(bookId) // return {title, author, total, available}
-      -> updateQuantity(bookId, quantity) // returns {success : true};
+  ✅   -> updateQuantity(bookId, quantity) // returns {success : true};
   ✅  -> deleteBook(bookId) // returns {success : true}
 
 ### In_Memory Structure
@@ -104,7 +104,7 @@
 
 
 ### TYPES OF ERROR
-  * 400 : Validation Error (invalid name,email, password,title ...)
+  * 400 : Validation Error (invalid format of name,email, password,title )
   * 401 : Authentication Error (wrong credential)
   * 404 : Not Found Error (customerId, bookId)
   * 409 : Conflict Error (already Exists, insufficient copies)
@@ -126,6 +126,46 @@
     * NotFoundError extends AppError
     * ConflictError extends AppError
     * ServerError extends AppError
+
+  ***registerCustomer**
+    `1` validate params data type (string, number, undefined)
+    `2` check whether customer already exists or not  // doesCustomerExist(email)
+
+  ***registerAdmin**
+    `1` validate params data type (string, number, undefined)
+    `2` check whether admin already exists or not // doesAdminExists()
+  
+  ***loginCustomer**
+    `1` validate params data type (string, number, undefined)
+    `2` check whether customer exists or not  // doesCustomerExist(email, password)
+  
+  ***loginAdmin**
+    `1` validate params data type (string, number, undefined)
+    `2` check whether admin exists or not   // doesAdminExist(email, password)
+  
+  ***addBook**
+    `1` validate params data type (string, number, undefined)
+    `2` check whether book already exists or not // doesBookExist(title, author)
+
+  ***viewBook**
+    `1` validate params data type (string, number, undefined);
+    `2` check whether bookId is correct or not  // doesBookExist(bookId)
+
+  ***removeBook**
+    `1` validate params data type (string, number, undefined);
+    `2` check whether bookId is correct or not  // doesBookExist(bookId)
+  
+  ***updateQuantity**
+    `1` validate params data type (string, number, undefined);
+    `2` check whether bookId is correct or not  // doesBookExist(bookId)
+  
+  ***borrowBook**
+    `1` validate params data type (string, number, undefined);
+    `2` check whether bookId and customerId is correct or not // doesCustomerExist(customerId) doesBookExist(bookId)
+  
+  ***returnBook**
+    `1` validate params data type (string, number, undefined);
+    `2` check whether bookId and customerId is correct or not  // doesCustomerExist(customerId) doesBookExist(bookId)
 
 
 ### USER INTERFACE

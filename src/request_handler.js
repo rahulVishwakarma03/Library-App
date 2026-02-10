@@ -45,26 +45,29 @@ const validateRequest = (method, path) => {
   }
 };
 
-export const handleRequest = async (library, request) => {
+const handleRequest = async (library, request, method, path) => {
+  if (method === "POST") {
+    const body = await request.json();
+    console.log({ method, path, body });
+
+    return handlersForPOST[path](library, body);
+  }
+
+  console.log({ method, path });
+  return handlersForGET[path](library);
+};
+
+export const requestHandler = async (library, request) => {
   const { method, url } = request;
   const path = new URL(url).pathname;
 
   try {
     validateRequest(method, path);
-
-    if (method === "POST") {
-      const body = await request.json();
-      console.log({ method, url, body });
-
-      return handlersForPOST[path](library, body);
-    }
-
-    console.log({ method, url });
-    return handlersForGET[path](library);
+    return await handleRequest(library, request, method, path);
   } catch (error) {
     return createErrorResponse(error);
   }
 };
 
 export const createRequestHandler = (library) => async (request) =>
-  await handleRequest(library, request);
+  await requestHandler(library, request);

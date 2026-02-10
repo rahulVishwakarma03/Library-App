@@ -134,8 +134,8 @@ describe("Library", () => {
     it("should fail if bookId is wrong", () => {
       assertThrows(
         () => library.updateQuantity({ bookId: 2 }),
-        AuthenticationError,
-        "Wrong bookId",
+        NotFoundError,
+        "Book not found",
       );
     });
   });
@@ -169,8 +169,8 @@ describe("Library", () => {
     it("should fail if book doesn't exist", () => {
       assertThrows(
         () => library.removeBook({ bookId: 1 }),
-        AuthenticationError,
-        "Wrong bookId",
+        NotFoundError,
+        "Book not found",
       );
     });
 
@@ -243,8 +243,8 @@ describe("Library", () => {
       library.addBook(bookDetails);
       assertThrows(
         () => library.borrowBook({ customerId: 5, bookId: 1 }),
-        AuthenticationError,
-        "Wrong customerId or bookId",
+        NotFoundError,
+        "Customer or Book not found",
       );
     });
 
@@ -252,8 +252,8 @@ describe("Library", () => {
       library.addBook(bookDetails);
       assertThrows(
         () => library.borrowBook({ customerId: 1, bookId: 4 }),
-        AuthenticationError,
-        "Wrong customerId or bookId",
+        NotFoundError,
+        "Customer or Book not found",
       );
     });
   });
@@ -273,8 +273,8 @@ describe("Library", () => {
     it("should fail if customer details is invalid", () => {
       assertThrows(
         () => library.listBorrowed({ customerId: 5 }),
-        AuthenticationError,
-        "Wrong customerId",
+        NotFoundError,
+        "Customer not found",
       );
     });
 
@@ -304,16 +304,16 @@ describe("Library", () => {
     it("should fail if customer details is invalid", () => {
       assertThrows(
         () => library.returnBook({ customerId: 5, bookId: 1 }),
-        AuthenticationError,
-        "Wrong customerId",
+        NotFoundError,
+        "Customer not found",
       );
     });
 
     it("should fail if book details is invalid", () => {
       assertThrows(
         () => library.returnBook({ customerId: 1, bookId: 2 }),
-        AuthenticationError,
-        "Wrong bookId",
+        NotFoundError,
+        "Book not found",
       );
     });
   });

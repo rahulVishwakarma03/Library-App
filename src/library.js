@@ -137,7 +137,7 @@ export class Library {
     const book = this.#findBookBy({ bookId });
 
     if (book === undefined) {
-      throw new AuthenticationError("Wrong bookId");
+      throw new NotFoundError("Book not found");
     }
 
     if (!Number.isInteger(offset) || (book.available + offset < 0)) {
@@ -168,7 +168,7 @@ export class Library {
     );
 
     if (bookIndex === -1) {
-      throw new AuthenticationError("Wrong bookId");
+      throw new NotFoundError("Book not found");
     }
 
     const book = this.#library.books[bookIndex];
@@ -211,7 +211,7 @@ export class Library {
     const customer = this.#findCustomerBy({ customerId });
 
     if (customer === undefined) {
-      throw new AuthenticationError("Wrong customerId");
+      throw new NotFoundError("Customer not found");
     }
 
     const borrowedBooks = customer.borrowed;
@@ -232,7 +232,7 @@ export class Library {
     const book = this.#findBookBy({ bookId });
 
     if (customer === undefined || book === undefined) {
-      throw new AuthenticationError("Wrong customerId or bookId");
+      throw new NotFoundError("Customer or Book not found");
     }
 
     const { title, author, available } = book;
@@ -255,7 +255,7 @@ export class Library {
     const book = this.#findBookBy({ bookId });
 
     if (customer === undefined) {
-      throw new AuthenticationError("Wrong customerId");
+      throw new NotFoundError("Customer not found");
     }
 
     const bookIndex = customer.borrowed.findIndex((book) =>
@@ -263,7 +263,7 @@ export class Library {
     );
 
     if (bookIndex === -1) {
-      throw new AuthenticationError("Wrong bookId");
+      throw new NotFoundError("Book not found");
     }
 
     customer.borrowed.splice(bookIndex, 1);
