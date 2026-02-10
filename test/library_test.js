@@ -98,11 +98,11 @@ describe("Library", () => {
       );
     });
 
-    it("should fail if total book copies is zero", () => {
+    it("should fail if total quantity is invalid", () => {
       assertThrows(
-        () => library.addBook({ ...bookDetails, total: 0 }),
+        () => library.addBook({ ...bookDetails, total: -4.3 }),
         ValidationError,
-        "Total can not be zero",
+        "Invalid total quantity",
       );
     });
   });
@@ -111,7 +111,7 @@ describe("Library", () => {
     it("should update quantity", () => {
       library.addBook(bookDetails);
       assertEquals(
-        library.updateQuantity({ bookId: 1, quantity: 2 }).status,
+        library.updateQuantity({ bookId: 1, offset: 2 }).status,
         204,
       );
     });
@@ -119,13 +119,13 @@ describe("Library", () => {
     it("should fail if quantity is invalid", () => {
       library.addBook(bookDetails);
       assertThrows(
-        () => library.updateQuantity({ bookId: 1, quantity: -10 }),
+        () => library.updateQuantity({ bookId: 1, offset: -10 }),
         ValidationError,
         "Invalid quantity",
       );
 
       assertThrows(
-        () => library.updateQuantity({ bookId: 1, quantity: 2.4 }),
+        () => library.updateQuantity({ bookId: 1, offset: 2.4 }),
         ValidationError,
         "Invalid quantity",
       );

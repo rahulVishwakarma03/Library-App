@@ -1,7 +1,7 @@
 import { input, password, select } from "@inquirer/prompts";
 
 export const log = (message) => {
-  console.log(`\n${message}\n`);
+  console.log(`\n---${message}---\n`);
 };
 
 export const createSelector = async (message, choices) => {
@@ -80,35 +80,33 @@ const createBooksChoices = (books) =>
 
 export const handleBookSelection = async (books) => {
   const choices = createBooksChoices(books);
-  const bookId = await createSelector("Select a book : ", choices);
-
-  return bookId;
+  return await createSelector("Select a book : ", [...choices, "Back"]);
 };
 
 const manageAvailableBooks = async (handler, customerId) => {
   const response = await handler("/listAllBooks", "GET");
   const body = await response.json();
 
-  if (response.status === 200) {
-    const bookId = await handleBookSelection(body.data);
-    await handleBorrowBookMenu(handler, customerId, bookId);
-    return;
+  if (response.status !== 200) {
+    return log(body.message);
   }
 
-  log(body.message);
+  const option = await handleBookSelection(body.data);
+  if (option === "Back") return;
+  await handleBorrowBookMenu(handler, customerId, option);
 };
 
 const manageBorrowedBooks = async (handler, customerId) => {
   const response = await handler("/listBorrowed", "POST", { customerId });
   const body = await response.json();
 
-  if (response.status === 200) {
-    const bookId = await handleBookSelection(body.data);
-    await handleReturnBookMenu(handler, customerId, bookId);
-    return;
+  if (response.status !== 200) {
+    return log(body.message);
   }
 
-  log(body.message);
+  const option = await handleBookSelection(body.data);
+  if (option === "Back") return;
+  await handleReturnBookMenu(handler, customerId, option);
 };
 
 const CUSTOMER_ACTION_MAPPER = {

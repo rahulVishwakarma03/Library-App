@@ -114,8 +114,8 @@ export class Library {
       throw new ConflictError("Book already exists");
     }
 
-    if (total === 0) {
-      throw new ValidationError("Total can not be zero!");
+    if (!Number.isInteger(total) || total <= 0) {
+      throw new ValidationError("Invalid total quantity");
     }
 
     this.#library.books.push({
@@ -133,19 +133,19 @@ export class Library {
     });
   }
 
-  updateQuantity({ bookId, quantity }) {
+  updateQuantity({ bookId, offset }) {
     const book = this.#findBookBy({ bookId });
 
     if (book === undefined) {
       throw new AuthenticationError("Wrong bookId");
     }
 
-    if (!Number.isInteger(quantity) || (book.available + quantity < 0)) {
+    if (!Number.isInteger(offset) || (book.available + offset < 0)) {
       throw new ValidationError("Invalid quantity");
     }
 
-    book.available += quantity;
-    book.total += quantity;
+    book.available += offset;
+    book.total += offset;
 
     return this.#createResponse(204);
   }

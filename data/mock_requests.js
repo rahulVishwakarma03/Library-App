@@ -34,7 +34,7 @@ export const mockRequests = {
   updateQuantity: {
     url: URL + "/updateQuantity",
     method: "POST",
-    body: { bookId: 1, quantity: 4 },
+    body: { bookId: 1, offset: 4 },
   },
   viewBook: {
     url: URL + "/viewBook",

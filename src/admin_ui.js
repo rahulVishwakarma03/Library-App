@@ -1,4 +1,4 @@
-import { input } from "@inquirer/prompts";
+import { input, number } from "@inquirer/prompts";
 import {
   createSelector,
   handleBookSelection,
@@ -24,7 +24,7 @@ const booksMenuChoices = [
 const takeBookInfo = async () => {
   const title = await input({ message: "Enter book title : " });
   const author = await input({ message: "Enter author name : " });
-  const total = await input({ message: "Enter total copies : " });
+  const total = await number({ message: "Enter total copies : " });
 
   return { title, author, total };
 };
@@ -46,10 +46,25 @@ const viewBook = async (handler, bookId) => {
   const body = await response.json();
 
   if (response.status === 200) {
-    console.table(body.data);
+    console.table([body.data]);
     return;
   }
 
+  log(body.message);
+};
+
+const updateQuantity = async (handler, bookId) => {
+  const offset = await number({ message: "Enter inc(+ve)/dec(-ve) offset : " });
+  const response = await handler("/updateQuantity", "POST", {
+    bookId,
+    offset,
+  });
+
+  if (response.status === 204) {
+    log("Quantity updated successfully!");
+    return;
+  }
+  const body = await response.json();
   log(body.message);
 };
 
@@ -58,7 +73,11 @@ const removeBook = async (handler, bookId) => {
 
   if (response.status === 204) {
     log("Book removed successfully!");
+    return;
   }
+
+  const body = await response.json();
+  log(body.message);
 };
 
 const handleBookOperationsMenu = async (handler, bookId) => {
@@ -84,8 +103,9 @@ const manageBook = async (handler) => {
   if (response.status === 200) {
     const books = body.data.map(({ bookId, title }) => ({ bookId, title }));
 
-    const bookId = await handleBookSelection(books);
-    return await handleBookOperationsMenu(handler, bookId);
+    const option = await handleBookSelection(books);
+    if (option === "Back") return;
+    return await handleBookOperationsMenu(handler, option);
   }
 
   log(body.message);
@@ -113,7 +133,7 @@ const ADMIN_ACTION_MAPPER = {
   "listBooks": listBooks,
   "manageBook": manageBook,
   "viewBook": viewBook,
-  "updateQuantity": () => {},
+  "updateQuantity": updateQuantity,
 };
 
 const manageAdminMenu = async (handler) => {
