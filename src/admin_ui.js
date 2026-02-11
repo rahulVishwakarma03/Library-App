@@ -5,6 +5,7 @@ import {
   handleLogin,
   handleRegistration,
   log,
+  REQUESTS_PATH,
 } from "./customer_ui.js";
 
 const adminMenuChoices = [
@@ -30,7 +31,7 @@ const takeBookInfo = async () => {
 };
 
 const listBooks = async (handler) => {
-  const response = await handler("/listAllBooks", "GET");
+  const response = await handler(REQUESTS_PATH.listAllBooks, "GET");
   const body = await response.json();
 
   if (response.status === 200) {
@@ -42,7 +43,7 @@ const listBooks = async (handler) => {
 };
 
 const viewBook = async (handler, bookId) => {
-  const response = await handler("/viewBook", "POST", { bookId });
+  const response = await handler(REQUESTS_PATH.viewBook, "POST", { bookId });
   const body = await response.json();
 
   if (response.status === 200) {
@@ -55,7 +56,7 @@ const viewBook = async (handler, bookId) => {
 
 const updateQuantity = async (handler, bookId) => {
   const offset = await number({ message: "Enter inc(+ve)/dec(-ve) offset : " });
-  const response = await handler("/updateQuantity", "POST", {
+  const response = await handler(REQUESTS_PATH.updateQuantity, "POST", {
     bookId,
     offset,
   });
@@ -69,7 +70,7 @@ const updateQuantity = async (handler, bookId) => {
 };
 
 const removeBook = async (handler, bookId) => {
-  const response = await handler("/removeBook", "POST", { bookId });
+  const response = await handler(REQUESTS_PATH.removeBook, "POST", { bookId });
 
   if (response.status === 204) {
     log("Book removed successfully!");
@@ -97,7 +98,7 @@ const handleBookOperationsMenu = async (handler, bookId) => {
 };
 
 const manageBook = async (handler) => {
-  const response = await handler("/listAllBooks", "GET");
+  const response = await handler(REQUESTS_PATH.listAllBooks, "GET");
   const body = await response.json();
 
   if (response.status === 200) {
@@ -126,9 +127,9 @@ const addBook = async (handler) => {
 
 const ADMIN_ACTION_MAPPER = {
   "Register": async (handler) =>
-    await handleRegistration(handler, "/admin/register"),
+    await handleRegistration(handler, REQUESTS_PATH.registerAdmin),
   "Login": async (handler, onLogin) =>
-    await handleLogin(handler, "/admin/login", onLogin),
+    await handleLogin(handler, REQUESTS_PATH.loginAdmin, onLogin),
   "addBook": addBook,
   "listBooks": listBooks,
   "manageBook": manageBook,

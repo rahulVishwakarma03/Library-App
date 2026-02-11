@@ -1,5 +1,20 @@
 import { input, password, select } from "@inquirer/prompts";
 
+export const REQUESTS_PATH = {
+  registerCustomer: "/customer/register",
+  registerAdmin: "/admin/register",
+  loginCustomer: "/customer/login",
+  loginAdmin: "/admin/login",
+  addBook: "/addBook",
+  viewBook: "/viewBook",
+  removeBook: "/removeBook",
+  updateQuantity: "/updateQuantity",
+  borrowBook: "/borrowBook",
+  returnBook: "/returnBook",
+  listAllBooks: "/listAllBooks",
+  listBorrowed: "/listBorrowed",
+};
+
 export const log = (message) => {
   console.log(`\n---${message}---\n`);
 };
@@ -46,7 +61,7 @@ const handleBorrowBookMenu = async (handler, customerId, bookId) => {
 
   if (action === "Back") return;
 
-  const response = await handler("/borrowBook", "POST", {
+  const response = await handler(REQUESTS_PATH.borrowBook, "POST", {
     customerId,
     bookId,
   });
@@ -61,7 +76,7 @@ const handleReturnBookMenu = async (handler, customerId, bookId) => {
 
   if (action === "Back") return;
 
-  const response = await handler("/returnBook", "POST", {
+  const response = await handler(REQUESTS_PATH.returnBook, "POST", {
     customerId,
     bookId,
   });
@@ -84,7 +99,7 @@ export const handleBookSelection = async (books) => {
 };
 
 const manageAvailableBooks = async (handler, customerId) => {
-  const response = await handler("/listAllBooks", "GET");
+  const response = await handler(REQUESTS_PATH.listAllBooks, "GET");
   const body = await response.json();
 
   if (response.status !== 200) {
@@ -97,7 +112,9 @@ const manageAvailableBooks = async (handler, customerId) => {
 };
 
 const manageBorrowedBooks = async (handler, customerId) => {
-  const response = await handler("/listBorrowed", "POST", { customerId });
+  const response = await handler(REQUESTS_PATH.listBorrowed, "POST", {
+    customerId,
+  });
   const body = await response.json();
 
   if (response.status !== 200) {
@@ -111,9 +128,9 @@ const manageBorrowedBooks = async (handler, customerId) => {
 
 const CUSTOMER_ACTION_MAPPER = {
   "Register": async (handler) =>
-    await handleRegistration(handler, "/customer/register"),
+    await handleRegistration(handler, REQUESTS_PATH.registerCustomer),
   "Login": async (handler, onLogin) =>
-    await handleLogin(handler, "/customer/login", onLogin),
+    await handleLogin(handler, REQUESTS_PATH.loginCustomer, onLogin),
   "Books": async (handler, customerId) =>
     await manageAvailableBooks(handler, customerId),
   "Borrowed": async (handler, customerId) =>
