@@ -7,7 +7,7 @@ import {
   ConflictError,
   NotFoundError,
   ValidationError,
-} from "../src/custom_errors.js";
+} from "../src/utils/custom_errors.js";
 
 describe("Library", () => {
   let library;

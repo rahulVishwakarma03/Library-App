@@ -1,5 +1,5 @@
-import { manageAdmin } from "./admin_ui.js";
-import { createSelector, manageCustomer } from "./customer_ui.js";
+import { manageAdmin } from "./user_interface/ui_manager.js";
+import { createSelector, manageCustomer } from "./user_interface/ui_manager.js";
 
 export const uiManager = async (handler) => {
   while (true) {

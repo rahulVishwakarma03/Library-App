@@ -38,22 +38,37 @@
 ### Top Level Functions for different features
 
   *** Customer tasks ***
-  ✅  -> registerCustomer(name,email, password) // returns {success:true}
-  ✅  -> loginCustomer(email, password) // returns {success : true/false}
-  ✅  -> listBooks()// returns all books
-  ✅  -> listBorrowed(customerId) // returns books borrowed by the customer itself
-  ✅  -> borrowBook(customerId, bookId) // returns {success : true/false}
-  ✅  -> returnBook(customerId, bookId) // returns {success : true/false}
+  ✅  -> registerCustomer(name,email, password) 
+  ✅  -> loginCustomer(email, password) 
+  ✅  -> listBooks()
+  ✅  -> listBorrowed(customerId) 
+  ✅  -> borrowBook(customerId, bookId) 
+  ✅  -> returnBook(customerId, bookId) 
 
   *** Admin tasks ***
-  ✅  -> registerAdmin(name,email, password) // returns {success:true}
-  ✅  -> loginAdmin(email, password) // returns {success : true/false}
-  ✅  -> listBooks()// returns all books
-      -> listCustomers()// returns all customers
-  ✅  -> AddBook(title, author, totalQuantity){id, available is default} // returns {success : true}
-  ✅  -> viewBook(bookId) // return {title, author, total, available}
-  ✅   -> updateQuantity(bookId, quantity) // returns {success : true};
-  ✅  -> deleteBook(bookId) // returns {success : true}
+  ✅  -> registerAdmin(name,email, password) 
+  ✅  -> loginAdmin(email, password) 
+  ✅  -> listBooks()
+  ✅  -> AddBook(title, author, totalQuantity) 
+  ✅  -> viewBook(bookId) 
+  ✅  -> updateQuantity(bookId, quantity) 
+  ✅  -> deleteBook(bookId) 
+
+
+### API Endpoints
+
+1. /member/register
+2. /member/login
+3. /admin/register
+4. /admin/login
+5. /books/add
+6. /books/view
+7. /books/list
+8. /books/updateQuantity
+9. /books/delete
+10./borrows/borrow
+11./borrows/list
+12./borrows/return
 
 ### In_Memory Structure
   
@@ -127,19 +142,19 @@
     * ConflictError extends AppError
     * ServerError extends AppError
 
-  ***registerCustomer**
+  ***registerCustomer**✅ 
     `1` validate params data type (string, number, undefined)
     `2` check whether customer already exists or not  // doesCustomerExist(email)
 
-  ***registerAdmin**
+  ***registerAdmin**✅ 
     `1` validate params data type (string, number, undefined)
     `2` check whether admin already exists or not // doesAdminExists()
   
-  ***loginCustomer**
+  ***loginCustomer**✅ 
     `1` validate params data type (string, number, undefined)
     `2` check whether customer exists or not  // doesCustomerExist(email, password)
   
-  ***loginAdmin**
+  ***loginAdmin**✅
     `1` validate params data type (string, number, undefined)
     `2` check whether admin exists or not   // doesAdminExist(email, password)
   
@@ -168,7 +183,7 @@
     `2` check whether bookId and customerId is correct or not  // doesCustomerExist(customerId) doesBookExist(bookId)
 
 
-### USER INTERFACE
+### TERMINAL USER INTERFACE
 
 Customer -> register -> Enter name , email, password
          -> login (Enter email, password)

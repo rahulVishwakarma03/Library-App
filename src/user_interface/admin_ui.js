@@ -6,7 +6,7 @@ import {
   handleRegistration,
   log,
   REQUESTS_PATH,
-} from "./customer_ui.js";
+} from "./user_interface/admin_ui.js";
 
 const adminMenuChoices = [
   { name: "Add Book", value: "addBook" },

@@ -1,6 +1,6 @@
 const URL = "http://localhost:8000";
 
-export const handleUserRequest = async (path, method, body) => {
+export const agent = async (path, method, body) => {
   const url = `${URL}${path}`;
   const response = await fetch(url, {
     method,

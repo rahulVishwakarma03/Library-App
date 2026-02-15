@@ -1,73 +1,41 @@
-import { ValidationError } from "./custom_errors.js";
+import { handleAdminService } from "./services/admin_service.js";
+import { handleBookService } from "./services/book_service.js";
+import { handleBorrowService } from "./services/borrows_service.js";
+import { handleMemberService } from "./services/member_service.js";
+import { NotFoundError } from "./utils/custom_errors.js";
+import { createResponse } from "./utils/req_res_generator.js";
 
-const handlersForGET = {
-  "/listAllBooks": (library) => library.listAllBooks(),
-  "/listAllCustomers": (library) => library.listAllCustomers(),
+const resourceHandlers = {
+  "admins": handleAdminService,
+  "members": handleMemberService,
+  "books": handleBookService,
+  "borrows": handleBorrowService,
 };
 
-const handlersForPOST = {
-  "/customer/register": (library, data) => library.registerCustomer(data),
-  "/admin/register": (library, data) => library.registerAdmin(data),
-  "/customer/login": (library, data) => library.loginCustomer(data),
-  "/admin/login": (library, data) => library.loginAdmin(data),
-  "/addBook": (library, data) => library.addBook(data),
-  "/updateQuantity": (library, data) => library.updateQuantity(data),
-  "/viewBook": (library, data) => library.viewBook(data),
-  "/removeBook": (library, data) => library.removeBook(data),
-  "/borrowBook": (library, data) => library.borrowBook(data),
-  "/listBorrowed": (library, data) => library.listBorrowed(data),
-  "/returnBook": (library, data) => library.returnBook(data),
-};
+const route = async (library, request) => {
+  const path = new URL(request.url).pathname;
 
-const createErrorResponse = ({ status, name, message }) => {
-  const body = {
-    success: false,
-    errorName: name,
-    message,
-  };
+  const resource = path.split("/")[1];
 
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "content-type": "application/json",
-    },
-  });
-};
-
-const validateRequest = (method, path) => {
-  const handlers = {
-    "GET": handlersForGET,
-    "POST": handlersForPOST,
-  };
-
-  if (!handlers[method][path]) {
-    throw new ValidationError("Invalid request!");
-  }
-};
-
-const handleRequest = async (library, request, method, path) => {
-  if (method === "POST") {
-    const body = await request.json();
-    console.log({ method, path, body });
-
-    return handlersForPOST[path](library, body);
+  if (resource in resourceHandlers) {
+    const handler = resourceHandlers[resource];
+    return await handler(library, request);
   }
 
-  console.log({ method, path });
-  return handlersForGET[path](library);
+  throw new NotFoundError("Path not found!");
 };
 
-export const requestHandler = async (library, request) => {
-  const { method, url } = request;
-  const path = new URL(url).pathname;
-
+export const handleRequest = async (library, request) => {
   try {
-    validateRequest(method, path);
-    return await handleRequest(library, request, method, path);
+    return await route(library, request);
   } catch (error) {
-    return createErrorResponse(error);
+    return createResponse(error.status, {
+      success: false,
+      errorName: error.name,
+      message: error.message,
+    });
   }
 };
 
 export const createRequestHandler = (library) => async (request) =>
-  await requestHandler(library, request);
+  await handleRequest(library, request);

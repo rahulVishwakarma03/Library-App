@@ -6,7 +6,7 @@ import {
   NotFoundError,
   ServerError,
   ValidationError,
-} from "../src/custom_errors.js";
+} from "../src/utils/custom_errors.js";
 
 describe("Custom Errors", () => {
   it("ValidationError", () => {
