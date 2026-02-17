@@ -35,8 +35,8 @@ export class DbClient {
        bookId INTEGER PRIMARY KEY AUTOINCREMENT,
        title TEXT NOT NULL,
        author TEXT NOT NULL,
-       total INTEGER NOT NULL,
-       available INTEGER NOT NULL,
+       total INTEGER NOT NULL CHECK(total > 0),
+       borrowed INTEGER DEFAULT 0 NOT NULL CHECK(borrowed >=0),
        UNIQUE(title, author)
        )STRICT;
        `;
@@ -88,9 +88,8 @@ export class DbClient {
   }
 
   createBook({ title, author, total }) {
-    const query =
-      "INSERT INTO books (title, author, total, available) VALUES (?,?,?,?)";
-    return this.#db.prepare(query).run(title, author, total, total);
+    const query = "INSERT INTO books (title, author, total) VALUES (?,?,?)";
+    return this.#db.prepare(query).run(title, author, total);
   }
 
   findBookById({ bookId }) {
@@ -101,5 +100,15 @@ export class DbClient {
   findBookByTitleAndAuthor({ title, author }) {
     const query = "SELECT * FROM books WHERE title=? AND author=?";
     return this.#db.prepare(query).get(title, author);
+  }
+
+  deleteBook({ bookId }) {
+    const query = "DELETE FROM books WHERE bookId=?";
+    return this.#db.prepare(query).run(bookId);
+  }
+
+  updateBookQuantity({ bookId, quantity }) {
+    const query = "UPDATE books SET total=? WHERE bookId=?";
+    return this.#db.prepare(query).run(quantity, bookId);
   }
 }

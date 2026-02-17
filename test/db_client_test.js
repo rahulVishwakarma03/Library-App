@@ -1,10 +1,10 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../src/db_client.js";
 import { mockRequests } from "../data/mock_requests.js";
 
-describe.only("DB Client", () => {
+describe("DB Client", () => {
   let dbClient;
   let registrationDetails;
   let loginDetails;
@@ -17,102 +17,189 @@ describe.only("DB Client", () => {
     bookDetails = mockRequests.addBook.body;
   });
 
-  it("find table", () => {
-    const tables = dbClient.findTables();
-    assertEquals(tables, []);
-  });
-
-  it("initialize schema", () => {
-    const res = dbClient.initializeSchema();
-    const tables = res.map(({ name }) => name);
-
-    assertEquals(tables.includes("members"), true);
-    assertEquals(tables.includes("admins"), true);
-    assertEquals(tables.includes("books"), true);
-    assertEquals(tables.includes("borrows"), true);
-  });
-
-  it("create member", () => {
-    dbClient.initializeSchema();
-    const res = dbClient.createMember(registrationDetails);
-    assertEquals(res.lastInsertRowid, 1);
-  });
-
-  it("find member by memberId if member is not present", () => {
-    dbClient.initializeSchema();
-    const member = dbClient.findMemberById({ memberId: 1 });
-    assertEquals(member, undefined);
-  });
-
-  it("find member by memberId if member is present", () => {
-    dbClient.initializeSchema();
-    dbClient.createMember(registrationDetails);
-    const member = dbClient.findMemberById({ memberId: 1 });
-    assertEquals(member.email, registrationDetails.email);
-  });
-
-  it("find member by email if member is present", () => {
-    dbClient.initializeSchema();
-    dbClient.createMember(registrationDetails);
-    const member = dbClient.findMemberByEmail({
-      email: registrationDetails.email,
+  describe("Find Table", () => {
+    it("find table", () => {
+      const tables = dbClient.findTables();
+      assertEquals(tables, []);
     });
-    assertEquals(member.email, registrationDetails.email);
   });
 
-  it("create admin", () => {
-    dbClient.initializeSchema();
-    const res = dbClient.createAdmin(registrationDetails);
-    assertEquals(res.lastInsertRowid, 1);
-  });
+  describe("Schema Initialization", () => {
+    it("initialize schema", () => {
+      const res = dbClient.initializeSchema();
+      const tables = res.map(({ name }) => name);
 
-  it("find admin by adminId if admin is not present", () => {
-    dbClient.initializeSchema();
-    const admin = dbClient.findAdminById({ adminId: 1 });
-    assertEquals(admin, undefined);
-  });
-
-  it("find admin by adminId if admin is present", () => {
-    dbClient.initializeSchema();
-    dbClient.createAdmin(registrationDetails);
-    const admin = dbClient.findAdminById({ adminId: 1 });
-    assertEquals(admin.email, registrationDetails.email);
-  });
-
-  it("find admin by email if admin is present", () => {
-    dbClient.initializeSchema();
-    dbClient.createAdmin(registrationDetails);
-    const admin = dbClient.findAdminByEmail({
-      email: registrationDetails.email,
+      assertEquals(tables.includes("members"), true);
+      assertEquals(tables.includes("admins"), true);
+      assertEquals(tables.includes("books"), true);
+      assertEquals(tables.includes("borrows"), true);
     });
-    assertEquals(admin.email, registrationDetails.email);
   });
 
-  it("create book", () => {
-    dbClient.initializeSchema();
-    const res = dbClient.createBook(bookDetails);
-    assertEquals(res.lastInsertRowid, 1);
+  describe("Create a Member", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+    });
+
+    it("create member", () => {
+      const res = dbClient.createMember(registrationDetails);
+      assertEquals(res.lastInsertRowid, 1);
+    });
+
+    it("should throw error if member already exists", () => {
+      dbClient.createMember(registrationDetails);
+      assertThrows(() => dbClient.createMember(registrationDetails));
+    });
   });
 
-  it("find book by bookId if book is not present", () => {
-    dbClient.initializeSchema();
-    const book = dbClient.findBookById({ bookId: 1 });
-    assertEquals(book, undefined);
+  describe("Find a Member", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createMember(registrationDetails);
+    });
+
+    it("find member by memberId if member is not present", () => {
+      const member = dbClient.findMemberById({ memberId: 2 });
+      assertEquals(member, undefined);
+    });
+
+    it("find member by memberId if member is present", () => {
+      const member = dbClient.findMemberById({ memberId: 1 });
+      assertEquals(member.email, registrationDetails.email);
+    });
+
+    it("find member by email if member is present", () => {
+      const member = dbClient.findMemberByEmail({
+        email: registrationDetails.email,
+      });
+      assertEquals(member.email, registrationDetails.email);
+    });
   });
 
-  it("find book by bookId if book is present", () => {
-    dbClient.initializeSchema();
-    dbClient.createBook(bookDetails);
-    const book = dbClient.findBookById({ bookId: 1 });
-    assertEquals(book.title, bookDetails.title);
-    assertEquals(book.author, bookDetails.author);
+  describe("Create a Admin", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+    });
+
+    it("create admin", () => {
+      const res = dbClient.createAdmin(registrationDetails);
+      assertEquals(res.lastInsertRowid, 1);
+    });
+
+    it("should throw error if admin already exists", () => {
+      dbClient.createAdmin(registrationDetails);
+      assertThrows(() => dbClient.createAdmin(registrationDetails));
+    });
   });
 
-  it("find book by title and author", () => {
-    dbClient.initializeSchema();
-    dbClient.createBook(bookDetails);
-    const book = dbClient.findBookByTitleAndAuthor(bookDetails);
-    assertEquals(book.title, bookDetails.title);
-    assertEquals(book.author, bookDetails.author);
+  describe("Find a admin", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createAdmin(registrationDetails);
+    });
+
+    it("find admin by adminId if admin is not present", () => {
+      const admin = dbClient.findAdminById({ adminId: 2 });
+      assertEquals(admin, undefined);
+    });
+
+    it("find admin by adminId if admin is present", () => {
+      const admin = dbClient.findAdminById({ adminId: 1 });
+      assertEquals(admin.email, registrationDetails.email);
+    });
+
+    it("find admin by email if admin is present", () => {
+      const admin = dbClient.findAdminByEmail({
+        email: registrationDetails.email,
+      });
+      assertEquals(admin.email, registrationDetails.email);
+    });
+  });
+
+  describe("Create Book", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+    });
+
+    it("create book", () => {
+      const res = dbClient.createBook(bookDetails);
+      assertEquals(res.lastInsertRowid, 1);
+    });
+
+    it("should fail if total is less than or equal to zero", () => {
+      assertThrows(() => dbClient.createBook({ ...bookDetails, total: 0 }));
+      assertThrows(() => dbClient.createBook({ ...bookDetails, total: -3 }));
+    });
+
+    it("should throw error if book already exists", () => {
+      dbClient.createBook(bookDetails);
+      assertThrows(() => dbClient.createBook(bookDetails));
+    });
+  });
+
+  describe("Find book", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+    });
+
+    it("find book by bookId if book is not present", () => {
+      const book = dbClient.findBookById({ bookId: 2 });
+      assertEquals(book, undefined);
+    });
+
+    it("find book by bookId if book is present", () => {
+      const book = dbClient.findBookById({ bookId: 1 });
+      assertEquals(book.title, bookDetails.title);
+      assertEquals(book.author, bookDetails.author);
+    });
+
+    it("find book by title and author", () => {
+      const book = dbClient.findBookByTitleAndAuthor(bookDetails);
+      assertEquals(book.title, bookDetails.title);
+      assertEquals(book.author, bookDetails.author);
+    });
+  });
+
+  describe("Delete Book", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+    });
+
+    it("delete a book", () => {
+      const res = dbClient.deleteBook({ bookId: 1 });
+      assertEquals(res.changes, 1);
+    });
+
+    it("shouldn't delete a book if book doesn't exist", () => {
+      const res = dbClient.deleteBook({ bookId: 2 });
+      assertEquals(res.changes, 0);
+    });
+  });
+
+  describe("Update book quantity", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+    });
+
+    it("update quantity of a book", () => {
+      const res = dbClient.updateBookQuantity({ bookId: 1, quantity: 10 });
+      assertEquals(res.changes, 1);
+      assertEquals(dbClient.findBookById({ bookId: 1 }).total, 10);
+    });
+
+    it("shouldn't update the quantity of a book if quantity is less than or equal to zero", () => {
+      assertThrows(() =>
+        dbClient.updateBookQuantity({ bookId: 1, quantity: 0 })
+      );
+      assertEquals(dbClient.findBookById({ bookId: 1 }).total, 5);
+    });
+
+    it("shouldn't update the quantity of a book if book doesn't exists", () => {
+      const res = dbClient.updateBookQuantity({ bookId: 2, quantity: 10 });
+      assertEquals(res.changes, 0);
+    });
   });
 });
