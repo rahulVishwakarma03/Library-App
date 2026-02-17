@@ -87,4 +87,32 @@ describe.only("DB Client", () => {
     });
     assertEquals(admin.email, registrationDetails.email);
   });
+
+  it("create book", () => {
+    dbClient.initializeSchema();
+    const res = dbClient.createBook(bookDetails);
+    assertEquals(res.lastInsertRowid, 1);
+  });
+
+  it("find book by bookId if book is not present", () => {
+    dbClient.initializeSchema();
+    const book = dbClient.findBookById({ bookId: 1 });
+    assertEquals(book, undefined);
+  });
+
+  it("find book by bookId if book is present", () => {
+    dbClient.initializeSchema();
+    dbClient.createBook(bookDetails);
+    const book = dbClient.findBookById({ bookId: 1 });
+    assertEquals(book.title, bookDetails.title);
+    assertEquals(book.author, bookDetails.author);
+  });
+
+  it("find book by title and author", () => {
+    dbClient.initializeSchema();
+    dbClient.createBook(bookDetails);
+    const book = dbClient.findBookByTitleAndAuthor(bookDetails);
+    assertEquals(book.title, bookDetails.title);
+    assertEquals(book.author, bookDetails.author);
+  });
 });

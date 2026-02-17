@@ -76,6 +76,7 @@ export class DbClient {
     const query = "INSERT INTO admins (name, email, password) VALUES (?,?,?)";
     return this.#db.prepare(query).run(name, email, password);
   }
+
   findAdminById({ adminId }) {
     const query = "SELECT * FROM admins WHERE adminId=?";
     return this.#db.prepare(query).get(adminId);
@@ -84,5 +85,21 @@ export class DbClient {
   findAdminByEmail({ email }) {
     const query = "SELECT * FROM admins WHERE email=?";
     return this.#db.prepare(query).get(email);
+  }
+
+  createBook({ title, author, total }) {
+    const query =
+      "INSERT INTO books (title, author, total, available) VALUES (?,?,?,?)";
+    return this.#db.prepare(query).run(title, author, total, total);
+  }
+
+  findBookById({ bookId }) {
+    const query = "SELECT * FROM books WHERE bookId=?";
+    return this.#db.prepare(query).get(bookId);
+  }
+
+  findBookByTitleAndAuthor({ title, author }) {
+    const query = "SELECT * FROM books WHERE title=? AND author=?";
+    return this.#db.prepare(query).get(title, author);
   }
 }
