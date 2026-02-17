@@ -41,18 +41,20 @@ export class DbClient {
        )STRICT;
        `;
 
-    const borrowsSchemaQuery = `
-       CREATE TABLE IF NOT EXISTS borrows (
-       bookId INTEGER REFERENCES book (bookId) ON DELETE CASCADE,
-       memberId INTEGER REFERENCES member (memberId) ON DELETE CASCADE,
-       borrowedAt TEXT DEFAULT CURRENT_TIMESTAMP
+    const bookTransSchemaQuery = `
+       CREATE TABLE IF NOT EXISTS book_transactions (
+       transactionId INTEGER PRIMARY KEY AUTOINCREMENT,
+       bookId INTEGER REFERENCES books (bookId) ON DELETE CASCADE,
+       memberId INTEGER REFERENCES members (memberId) ON DELETE CASCADE,
+       borrowedAt TEXT NOT NULL,
+       returnedAt TEXT
        )STRICT;
        `;
 
     this.#db.exec(adminsSchemaQuery);
     this.#db.exec(membersSchemaQuery);
     this.#db.exec(booksSchemaQuery);
-    this.#db.exec(borrowsSchemaQuery);
+    this.#db.exec(bookTransSchemaQuery);
 
     return this.findTables();
   }
@@ -72,6 +74,11 @@ export class DbClient {
     return this.#db.prepare(query).get(email);
   }
 
+  findMemberByEmailAndPassword({ email, password }) {
+    const query = "SELECT * FROM members WHERE email=? AND password=?";
+    return this.#db.prepare(query).get(email, password);
+  }
+
   createAdmin({ name, email, password }) {
     const query = "INSERT INTO admins (name, email, password) VALUES (?,?,?)";
     return this.#db.prepare(query).run(name, email, password);
@@ -85,6 +92,11 @@ export class DbClient {
   findAdminByEmail({ email }) {
     const query = "SELECT * FROM admins WHERE email=?";
     return this.#db.prepare(query).get(email);
+  }
+
+  findAdminByEmailAndPassword({ email, password }) {
+    const query = "SELECT * FROM admins WHERE email=? AND password=?";
+    return this.#db.prepare(query).get(email, password);
   }
 
   createBook({ title, author, total }) {
@@ -110,5 +122,28 @@ export class DbClient {
   updateBookQuantity({ bookId, quantity }) {
     const query = "UPDATE books SET total=? WHERE bookId=?";
     return this.#db.prepare(query).run(quantity, bookId);
+  }
+
+  borrowBook({ bookId, memberId }) {
+    const date = new Date();
+    const book = this.findBookById({ bookId });
+    const insertTransQuery =
+      "INSERT INTO book_transactions (bookId, memberId, borrowedAt) VALUES (?,?,?)";
+    const updateBookQuery = "UPDATE books SET borrowed=? WHERE bookId=?";
+
+    try {
+      this.#db.exec("BEGIN");
+      this.#db.prepare(updateBookQuery).run(book.borrowed + 1, bookId);
+      const trans = this.#db.prepare(insertTransQuery).run(
+        bookId,
+        memberId,
+        date.toLocaleString(),
+      );
+      this.#db.exec("COMMIT");
+      return trans;
+    } catch (e) {
+      this.#db.exec("ROLLBACK");
+      return {};
+    }
   }
 }

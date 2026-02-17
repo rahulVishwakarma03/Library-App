@@ -32,7 +32,7 @@ describe("DB Client", () => {
       assertEquals(tables.includes("members"), true);
       assertEquals(tables.includes("admins"), true);
       assertEquals(tables.includes("books"), true);
-      assertEquals(tables.includes("borrows"), true);
+      assertEquals(tables.includes("book_transactions"), true);
     });
   });
 
@@ -74,6 +74,13 @@ describe("DB Client", () => {
       });
       assertEquals(member.email, registrationDetails.email);
     });
+
+    it("find member by email and password if member is present", () => {
+      const member = dbClient.findMemberByEmailAndPassword(loginDetails);
+      assertEquals(member.memberId, 1);
+      assertEquals(member.email, registrationDetails.email);
+      assertEquals(member.password, registrationDetails.password);
+    });
   });
 
   describe("Create a Admin", () => {
@@ -113,6 +120,13 @@ describe("DB Client", () => {
         email: registrationDetails.email,
       });
       assertEquals(admin.email, registrationDetails.email);
+    });
+
+    it("find admin by email and password if admin is present", () => {
+      const admin = dbClient.findAdminByEmailAndPassword(loginDetails);
+      assertEquals(admin.adminId, 1);
+      assertEquals(admin.email, registrationDetails.email);
+      assertEquals(admin.password, registrationDetails.password);
     });
   });
 
@@ -200,6 +214,35 @@ describe("DB Client", () => {
     it("shouldn't update the quantity of a book if book doesn't exists", () => {
       const res = dbClient.updateBookQuantity({ bookId: 2, quantity: 10 });
       assertEquals(res.changes, 0);
+    });
+  });
+
+  describe("Borrow a Book", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+      dbClient.createMember(registrationDetails);
+    });
+
+    it("borrow a book", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      const res = dbClient.borrowBook({ bookId: 1, memberId: 1 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
+      assertEquals(res.lastInsertRowid, 1);
+    });
+
+    it("should rollback if memberId is wrong", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      const res = dbClient.borrowBook({ bookId: 1, memberId: 2 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      assertEquals(res, {});
+    });
+
+    it("should throw error if bookId is wrong", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      const res = dbClient.borrowBook({ bookId: 2, memberId: 1 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      assertEquals(res, {});
     });
   });
 });
