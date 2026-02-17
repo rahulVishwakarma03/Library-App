@@ -66,9 +66,9 @@
 7. /books/list
 8. /books/updateQuantity
 9. /books/delete
-10./borrows/borrow
-11./borrows/list
-12./borrows/return
+10. /borrows/borrow
+11. /borrows/list
+12. /borrows/return
 
 ### In_Memory Structure
   
@@ -105,6 +105,34 @@
       }, {},....
     ]
   }
+
+
+### Database
+
+  ## admin table
+  adminId, PK, Integer,
+  name, text, not null,
+  email, text, unique, not null,
+  password, text, not null
+
+  ## member table
+  memberId, PK, Integer,
+  name, text, not null,
+  email, text, unique, not null,
+  password, text, not null
+
+  ## book table
+  bookId, PK, Integer,
+  title, text, not null
+  author, text , not null
+  total, Integer > 0, not null
+  available, Integer >= 0
+  UNIQUE(title, author)
+
+  ## Borrows table
+  bookId, FK REF book
+  memberId, FK REF member
+  borrowingDate, currentTimeStamp
 
 ### LibraryManager
     * it binds the memoryStructure/sqliteDb and features into a class
