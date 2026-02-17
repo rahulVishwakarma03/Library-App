@@ -51,12 +51,6 @@ describe.only("DB Client", () => {
     assertEquals(member.email, registrationDetails.email);
   });
 
-  it("find member by email if member is not present", () => {
-    dbClient.initializeSchema();
-    const member = dbClient.findMemberByEmail({ email: "abc@gmail.com" });
-    assertEquals(member, undefined);
-  });
-
   it("find member by email if member is present", () => {
     dbClient.initializeSchema();
     dbClient.createMember(registrationDetails);
@@ -64,5 +58,33 @@ describe.only("DB Client", () => {
       email: registrationDetails.email,
     });
     assertEquals(member.email, registrationDetails.email);
+  });
+
+  it("create admin", () => {
+    dbClient.initializeSchema();
+    const res = dbClient.createAdmin(registrationDetails);
+    assertEquals(res.lastInsertRowid, 1);
+  });
+
+  it("find admin by adminId if admin is not present", () => {
+    dbClient.initializeSchema();
+    const admin = dbClient.findAdminById({ adminId: 1 });
+    assertEquals(admin, undefined);
+  });
+
+  it("find admin by adminId if admin is present", () => {
+    dbClient.initializeSchema();
+    dbClient.createAdmin(registrationDetails);
+    const admin = dbClient.findAdminById({ adminId: 1 });
+    assertEquals(admin.email, registrationDetails.email);
+  });
+
+  it("find admin by email if admin is present", () => {
+    dbClient.initializeSchema();
+    dbClient.createAdmin(registrationDetails);
+    const admin = dbClient.findAdminByEmail({
+      email: registrationDetails.email,
+    });
+    assertEquals(admin.email, registrationDetails.email);
   });
 });

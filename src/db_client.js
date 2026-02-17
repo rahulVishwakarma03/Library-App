@@ -71,4 +71,18 @@ export class DbClient {
     const query = "SELECT * FROM members WHERE email=?";
     return this.#db.prepare(query).get(email);
   }
+
+  createAdmin({ name, email, password }) {
+    const query = "INSERT INTO admins (name, email, password) VALUES (?,?,?)";
+    return this.#db.prepare(query).run(name, email, password);
+  }
+  findAdminById({ adminId }) {
+    const query = "SELECT * FROM admins WHERE adminId=?";
+    return this.#db.prepare(query).get(adminId);
+  }
+
+  findAdminByEmail({ email }) {
+    const query = "SELECT * FROM admins WHERE email=?";
+    return this.#db.prepare(query).get(email);
+  }
 }
