@@ -61,4 +61,14 @@ export class DbClient {
     const query = "INSERT INTO members (name, email, password) VALUES (?,?,?)";
     return this.#db.prepare(query).run(name, email, password);
   }
+
+  findMemberById({ memberId }) {
+    const query = "SELECT * FROM members WHERE memberId=?";
+    return this.#db.prepare(query).get(memberId);
+  }
+
+  findMemberByEmail({ email }) {
+    const query = "SELECT * FROM members WHERE email=?";
+    return this.#db.prepare(query).get(email);
+  }
 }
