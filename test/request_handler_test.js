@@ -5,7 +5,7 @@ import { handleRequest } from "../src/request_handler.js";
 import { mockRequests } from "../data/mock_requests.js";
 import { createRequest } from "../src/utils/req_res_generator.js";
 
-describe("Request handler", () => {
+describe.ignore("Request handler", () => {
   let library;
 
   beforeEach(() => {

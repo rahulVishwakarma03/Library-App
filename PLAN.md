@@ -126,13 +126,14 @@
   title, text, not null
   author, text , not null
   total, Integer > 0, not null
-  available, Integer >= 0
+  borrowed, Integer >= 0
   UNIQUE(title, author)
 
   ## Borrows table
   bookId, FK REF book
   memberId, FK REF member
-  borrowingDate, currentTimeStamp
+  borrowedAt, text NOT NULL
+  returnedAt, text
 
 ### LibraryManager
     * it binds the memoryStructure/sqliteDb and features into a class

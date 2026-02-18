@@ -36,7 +36,7 @@ export class DbClient {
        title TEXT NOT NULL,
        author TEXT NOT NULL,
        total INTEGER NOT NULL CHECK(total > 0),
-       borrowed INTEGER DEFAULT 0 NOT NULL CHECK(borrowed >=0),
+       borrowed INTEGER DEFAULT 0 NOT NULL CHECK(borrowed >=0 AND borrowed <= total),
        UNIQUE(title, author)
        )STRICT;
        `;
@@ -127,9 +127,9 @@ export class DbClient {
   borrowBook({ bookId, memberId }) {
     const date = new Date();
     const book = this.findBookById({ bookId });
+    const updateBookQuery = "UPDATE books SET borrowed=? WHERE bookId=?";
     const insertTransQuery =
       "INSERT INTO book_transactions (bookId, memberId, borrowedAt) VALUES (?,?,?)";
-    const updateBookQuery = "UPDATE books SET borrowed=? WHERE bookId=?";
 
     try {
       this.#db.exec("BEGIN");
@@ -141,9 +141,44 @@ export class DbClient {
       );
       this.#db.exec("COMMIT");
       return trans;
-    } catch (e) {
+    } catch {
       this.#db.exec("ROLLBACK");
       return {};
     }
+  }
+
+  returnBook({ transactionId, bookId }) {
+    const date = new Date();
+    const book = this.findBookById({ bookId });
+    const updateBookQuery = "UPDATE books SET borrowed=? WHERE bookId=?";
+    const updateTransQuery =
+      "UPDATE book_transactions SET returnedAt=? WHERE transactionId=?";
+
+    try {
+      this.#db.exec("BEGIN");
+      this.#db.prepare(updateBookQuery).run(book.borrowed - 1, bookId);
+      const trans = this.#db.prepare(updateTransQuery).run(
+        date.toLocaleString(),
+        transactionId,
+      );
+
+      if (trans.changes === 0) {
+        throw new Error("Wrong transactionId");
+      }
+      this.#db.exec("COMMIT");
+      return trans;
+    } catch {
+      this.#db.exec("ROLLBACK");
+      return {};
+    }
+  }
+
+  findBorrowedBooksByMemberId({ memberId }) {
+    const query =
+      `SELECT transactionId, bookId, title, author FROM book_transactions
+    INNER JOIN books USING(bookId)
+    WHERE memberId=? AND returnedAt IS NULL`;
+
+    return this.#db.prepare(query).all(memberId);
   }
 }

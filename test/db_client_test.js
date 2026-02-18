@@ -226,6 +226,7 @@ describe("DB Client", () => {
 
     it("borrow a book", () => {
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+
       const res = dbClient.borrowBook({ bookId: 1, memberId: 1 });
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
       assertEquals(res.lastInsertRowid, 1);
@@ -238,10 +239,60 @@ describe("DB Client", () => {
       assertEquals(res, {});
     });
 
-    it("should throw error if bookId is wrong", () => {
+    it("should rollback if bookId is wrong", () => {
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
       const res = dbClient.borrowBook({ bookId: 2, memberId: 1 });
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      assertEquals(res, {});
+    });
+  });
+
+  describe("Find borrowed book by memberId", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+      dbClient.createMember(registrationDetails);
+      dbClient.borrowBook({ bookId: 1, memberId: 1 });
+    });
+
+    it("Find borrowed books if book is borrowed but not returned", () => {
+      const res = dbClient.findBorrowedBooksByMemberId({ memberId: 1 });
+      assertEquals(res[0].bookId, 1);
+    });
+
+    it("Find borrowed books if book is borrowed but also returned", () => {
+      dbClient.returnBook({ bookId: 1, transactionId: 1 });
+      const res = dbClient.findBorrowedBooksByMemberId({ memberId: 1 });
+      assertEquals(res, []);
+    });
+  });
+
+  describe("Return a Book", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+      dbClient.createMember(registrationDetails);
+      dbClient.borrowBook({ bookId: 1, memberId: 1 });
+    });
+
+    it("return a book", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
+      const res = dbClient.returnBook({ bookId: 1, transactionId: 1 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
+      assertEquals(res.changes, 1);
+    });
+
+    it("should throw error if bookId is wrong", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
+      const res = dbClient.returnBook({ bookId: 2, transactionId: 1 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
+      assertEquals(res, {});
+    });
+
+    it("should throw error if transactionId is wrong", () => {
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
+      const res = dbClient.returnBook({ bookId: 1, transactionId: 2 });
+      assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 1);
       assertEquals(res, {});
     });
   });
