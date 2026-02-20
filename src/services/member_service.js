@@ -1,4 +1,42 @@
-import { NotFoundError } from "../utils/custom_errors.js";
+import {
+  AuthenticationError,
+  ConflictError,
+  NotFoundError,
+} from "../utils/custom_errors.js";
+import { createResponse } from "../utils/req_res_generator.js";
+import { validateInputType } from "./admin_service.js";
+
+export const registerMember = (dbClient, { name, email, password }) => {
+  validateInputType({ name, email, password });
+
+  const member = dbClient.findMemberByEmail({ email });
+  if (member) {
+    throw new ConflictError("Member already exists");
+  }
+
+  dbClient.createMember({ name, email, password });
+
+  return createResponse(201, {
+    success: true,
+    message: "Member Registered Successfully",
+  });
+};
+
+export const loginMember = (dbClient, { email, password }) => {
+  validateInputType({ email, password });
+
+  const member = dbClient.findMemberByEmailAndPassword({ email, password });
+
+  if (!member) {
+    throw new AuthenticationError("Wrong login details");
+  }
+
+  return createResponse(200, {
+    success: true,
+    data: { memberId: member.memberId },
+    message: "Member loggedIn Successfully",
+  });
+};
 
 export const memberRouteHandlers = {
   GET: {

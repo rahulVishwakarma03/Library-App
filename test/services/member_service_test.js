@@ -3,13 +3,16 @@ import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
 import { mockRequests } from "../../data/mock_requests.js";
-import { loginAdmin, registerAdmin } from "../../src/services/admin_service.js";
 import {
   AuthenticationError,
   ValidationError,
 } from "../../src/utils/custom_errors.js";
+import {
+  loginMember,
+  registerMember,
+} from "../../src/services/member_service.js";
 
-describe("Admin services", () => {
+describe("Member services", () => {
   let dbClient;
   let registrationDetails;
   let loginDetails;
@@ -17,14 +20,14 @@ describe("Admin services", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerAdmin.body;
-    loginDetails = mockRequests.loginAdmin.body;
+    registrationDetails = mockRequests.registerCustomer.body;
+    loginDetails = mockRequests.loginCustomer.body;
   });
 
-  describe("Register Admin", () => {
+  describe("Register Member", () => {
     it("should throw validation error if inputs are not provided", () => {
       assertThrows(
-        () => registerAdmin(dbClient, {}),
+        () => registerMember(dbClient, {}),
         ValidationError,
         "Invalid input format",
       );
@@ -32,27 +35,27 @@ describe("Admin services", () => {
 
     it("should throw validation error if input format is not valid", () => {
       assertThrows(
-        () => registerAdmin(dbClient, { name: 2, email: "", password: "" }),
+        () => registerMember(dbClient, { name: 2, email: "", password: "" }),
         ValidationError,
         "Invalid input format",
       );
     });
 
     it("should register if input is valid", () => {
-      const res = registerAdmin(dbClient, registrationDetails);
+      const res = registerMember(dbClient, registrationDetails);
       assertEquals(res.status, 201);
     });
 
     it("should throw conflict error if admin already exists with the same email", () => {
-      registerAdmin(dbClient, registrationDetails);
-      assertThrows(() => registerAdmin(dbClient, registrationDetails));
+      registerMember(dbClient, registrationDetails);
+      assertThrows(() => registerMember(dbClient, registrationDetails));
     });
   });
 
-  describe("Login Admin", () => {
+  describe("Login Member", () => {
     it("should throw validation error if inputs are not provided", () => {
       assertThrows(
-        () => loginAdmin(dbClient, {}),
+        () => loginMember(dbClient, {}),
         ValidationError,
         "Invalid input format",
       );
@@ -60,7 +63,7 @@ describe("Admin services", () => {
 
     it("should throw validation error if input format is not valid", () => {
       assertThrows(
-        () => loginAdmin(dbClient, { email: "", password: "" }),
+        () => loginMember(dbClient, { email: "", password: "" }),
         ValidationError,
         "Invalid input format",
       );
@@ -68,15 +71,15 @@ describe("Admin services", () => {
 
     it("should throw authentication error if login details is wrong", () => {
       assertThrows(
-        () => loginAdmin(dbClient, loginDetails),
+        () => loginMember(dbClient, loginDetails),
         AuthenticationError,
         "Wrong login details",
       );
     });
 
     it("should login if login details is correct", () => {
-      registerAdmin(dbClient, registrationDetails);
-      const res = loginAdmin(dbClient, loginDetails);
+      registerMember(dbClient, registrationDetails);
+      const res = loginMember(dbClient, loginDetails);
       assertEquals(res.status, 200);
     });
   });

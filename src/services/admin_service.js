@@ -6,17 +6,17 @@ import {
 } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 
-const isValidInputs = (list) =>
+export const isString = (list) =>
   list.every((el) => typeof el === "string" && el !== "");
 
-const validateInputFormat = (inputs) => {
-  if (!isValidInputs(inputs)) {
+export const validateInputType = (inputs) => {
+  if (!isString(Object.values(inputs))) {
     throw new ValidationError("Invalid input format");
   }
 };
 
 export const registerAdmin = (dbClient, { name, email, password }) => {
-  validateInputFormat([name, email, password]);
+  validateInputType({ name, email, password });
 
   const admin = dbClient.findAdminByEmail({ email });
   if (admin) {
@@ -32,7 +32,7 @@ export const registerAdmin = (dbClient, { name, email, password }) => {
 };
 
 export const loginAdmin = (dbClient, { email, password }) => {
-  validateInputFormat([email, password]);
+  validateInputType({ email, password });
 
   const admin = dbClient.findAdminByEmailAndPassword({ email, password });
 
