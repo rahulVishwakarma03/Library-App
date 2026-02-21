@@ -5,6 +5,7 @@ import {
   ValidationError,
 } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
+import { generateToken, TOKENS } from "../utils/tokens.js";
 
 export const isString = (list) =>
   list.every((el) => typeof el === "string" && el !== "");
@@ -40,9 +41,11 @@ export const loginAdmin = (dbClient, { email, password }) => {
     throw new AuthenticationError("Wrong login details");
   }
 
+  TOKENS.admin = generateToken();
+
   return createResponse(200, {
     success: true,
-    data: { adminId: admin.adminId },
+    token: TOKENS.admin,
     message: "Admin loggedIn Successfully",
   });
 };

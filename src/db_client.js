@@ -79,6 +79,11 @@ export class DbClient {
     return this.#db.prepare(query).get(email, password);
   }
 
+  findAllMembers() {
+    const query = "SELECT * FROM members";
+    return this.#db.prepare(query).all();
+  }
+
   createAdmin({ name, email, password }) {
     const query = "INSERT INTO admins (name, email, password) VALUES (?,?,?)";
     return this.#db.prepare(query).run(name, email, password);

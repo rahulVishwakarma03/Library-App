@@ -14,7 +14,6 @@ const resourceHandlers = {
 
 const route = async (library, request) => {
   const path = new URL(request.url).pathname;
-
   const resource = path.split("/")[1];
 
   if (resource in resourceHandlers) {
