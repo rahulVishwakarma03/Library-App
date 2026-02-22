@@ -152,8 +152,14 @@ export class DbClient {
     }
   }
 
-  returnBook({ transactionId, bookId }) {
+  findTransactionById({ transactionId }) {
+    const query = "SELECT * FROM book_transactions WHERE transactionId=?";
+    return this.#db.prepare(query).get(transactionId);
+  }
+
+  returnBook({ transactionId }) {
     const date = new Date();
+    const { bookId } = this.findTransactionById({ transactionId });
     const book = this.findBookById({ bookId });
     const updateBookQuery = "UPDATE books SET borrowed=? WHERE bookId=?";
     const updateTransQuery =

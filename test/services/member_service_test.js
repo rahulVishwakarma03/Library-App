@@ -8,9 +8,11 @@ import {
   ValidationError,
 } from "../../src/utils/custom_errors.js";
 import {
+  listMembers,
   loginMember,
   registerMember,
 } from "../../src/services/member_service.js";
+import { loginAdmin, registerAdmin } from "../../src/services/admin_service.js";
 
 describe("Member services", () => {
   let dbClient;
@@ -77,10 +79,43 @@ describe("Member services", () => {
       );
     });
 
-    it("should login if login details is correct", () => {
+    it("should login if login details is correct", async () => {
       registerMember(dbClient, registrationDetails);
       const res = loginMember(dbClient, loginDetails);
-      assertEquals(res.status, 200);
+      const body = await res.json();
+      assertEquals(body.success, true);
+    });
+  });
+
+  describe("list all members", () => {
+    it("should throw error if token doesn't match", () => {
+      const req = new Request("http://localhost:8000/members/list", {
+        method: "GET",
+        headers: {
+          authorization: "Bearer 1234",
+        },
+      });
+
+      assertThrows(
+        () => listMembers(dbClient, req),
+        AuthenticationError,
+        "Unauthorized!",
+      );
+    });
+
+    it("should list all members", async () => {
+      registerAdmin(dbClient, registrationDetails);
+      const loginRes = loginAdmin(dbClient, loginDetails);
+      const loginBody = await loginRes.json();
+      const req = new Request("http://localhost:8000/members/list", {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${loginBody.token}`,
+        },
+      });
+      const res = listMembers(dbClient, req);
+      const body = await res.json();
+      assertEquals(body.success, true);
     });
   });
 });

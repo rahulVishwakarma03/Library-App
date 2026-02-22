@@ -74,10 +74,11 @@ describe("Admin services", () => {
       );
     });
 
-    it("should login if login details is correct", () => {
+    it("should login if login details is correct", async () => {
       registerAdmin(dbClient, registrationDetails);
       const res = loginAdmin(dbClient, loginDetails);
-      assertEquals(res.status, 200);
+      const body = await res.json();
+      assertEquals(body.success, true);
     });
   });
 });

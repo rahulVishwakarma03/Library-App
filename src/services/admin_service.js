@@ -2,22 +2,14 @@ import {
   AuthenticationError,
   ConflictError,
   NotFoundError,
-  ValidationError,
 } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
-import { generateToken, TOKENS } from "../utils/tokens.js";
+import { validateInputType } from "../utils/utils.js";
 
-export const isString = (list) =>
-  list.every((el) => typeof el === "string" && el !== "");
-
-export const validateInputType = (inputs) => {
-  if (!isString(Object.values(inputs))) {
-    throw new ValidationError("Invalid input format");
-  }
-};
+export const isString = (el) => typeof el === "string" && el !== "";
 
 export const registerAdmin = (dbClient, { name, email, password }) => {
-  validateInputType({ name, email, password });
+  validateInputType({ name, email, password }, isString);
 
   const admin = dbClient.findAdminByEmail({ email });
   if (admin) {
@@ -33,7 +25,7 @@ export const registerAdmin = (dbClient, { name, email, password }) => {
 };
 
 export const loginAdmin = (dbClient, { email, password }) => {
-  validateInputType({ email, password });
+  validateInputType({ email, password }, isString);
 
   const admin = dbClient.findAdminByEmailAndPassword({ email, password });
 
@@ -41,11 +33,9 @@ export const loginAdmin = (dbClient, { email, password }) => {
     throw new AuthenticationError("Wrong login details");
   }
 
-  TOKENS.admin = generateToken();
-
   return createResponse(200, {
     success: true,
-    token: TOKENS.admin,
+    token: admin.adminId,
     message: "Admin loggedIn Successfully",
   });
 };
