@@ -2,7 +2,11 @@ import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
-import { borrowBook, returnBook } from "../../src/services/borrows_service.js";
+import {
+  borrowBook,
+  listBorrowed,
+  returnBook,
+} from "../../src/services/borrows_service.js";
 import {
   NotFoundError,
   ValidationError,
@@ -73,28 +77,56 @@ describe("Borrows service", () => {
         "Invalid input format",
       );
     });
+
+    it("should throw validation error if input type is not valid", () => {
+      assertThrows(
+        () => returnBook(dbClient, { transactionId: "abc" }),
+        ValidationError,
+        "Invalid input format",
+      );
+    });
+
+    it("should throw not found error if given transactionId doesn't exist", () => {
+      assertThrows(
+        () => returnBook(dbClient, { transactionId: 1 }),
+        NotFoundError,
+        "Transaction id not found",
+      );
+    });
+
+    it("should return the book", () => {
+      registerMember(dbClient, registrationDetails);
+      dbClient.createBook(bookDetails);
+      borrowBook(dbClient, { bookId: 1, memberId: 1 });
+      assertEquals(returnBook(dbClient, { transactionId: 1 }).status, 200);
+    });
   });
 
-  it("should throw validation error if input type is not valid", () => {
-    assertThrows(
-      () => returnBook(dbClient, { transactionId: "abc" }),
-      ValidationError,
-      "Invalid input format",
-    );
-  });
+  describe("List all borrowed books by a member", () => {
+    it("should throw validation error if inputs are not provided", () => {
+      assertThrows(
+        () => listBorrowed(dbClient, {}),
+        ValidationError,
+        "Invalid input format",
+      );
+    });
 
-  it("should throw not found error if given transactionId doesn't exist", () => {
-    assertThrows(
-      () => returnBook(dbClient, { transactionId: 1 }),
-      NotFoundError,
-      "Transaction id not found",
-    );
-  });
+    it("should throw validation error if input type is not valid", () => {
+      assertThrows(
+        () => listBorrowed(dbClient, { memberId: "abc" }),
+        ValidationError,
+        "Invalid input format",
+      );
+    });
 
-  it("should return the book", () => {
-    registerMember(dbClient, registrationDetails);
-    dbClient.createBook(bookDetails);
-    borrowBook(dbClient, { bookId: 1, memberId: 1 });
-    assertEquals(returnBook(dbClient, { transactionId: 1 }).status, 200);
+    it("should list all borrowed by a member", async () => {
+      registerMember(dbClient, registrationDetails);
+      dbClient.createBook(bookDetails);
+      borrowBook(dbClient, { bookId: 1, memberId: 1 });
+      const res = listBorrowed(dbClient, { memberId: 1 });
+      const body = await res.json();
+      assertEquals(res.status, 200);
+      assertEquals(body.data.borrowedBooks[0].bookId, 1);
+    });
   });
 });

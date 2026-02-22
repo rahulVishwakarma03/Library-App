@@ -51,6 +51,17 @@ export const returnBook = (dbClient, { transactionId }) => {
   });
 };
 
+export const listBorrowed = (dbClient, { memberId }) => {
+  validateInputType({ memberId }, isInteger);
+
+  const borrowedBooks = dbClient.findBorrowedBooksByMemberId({ memberId });
+  return createResponse(200, {
+    success: true,
+    data: { borrowedBooks },
+    message: "Successful",
+  });
+};
+
 export const borrowsRouteHandler = {
   "/borrows/borrow": (library, data) => library.borrowBook(data),
   "/borrows/return": (library, data) => library.returnBook(data),

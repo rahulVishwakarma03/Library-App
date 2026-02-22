@@ -152,6 +152,15 @@ export class DbClient {
     }
   }
 
+  findBorrowedBooksByMemberId({ memberId }) {
+    const query =
+      `SELECT transactionId, bookId, title, author, memberId FROM book_transactions
+    INNER JOIN books USING(bookId)
+    WHERE memberId=? AND returnedAt IS NULL`;
+
+    return this.#db.prepare(query).all(memberId);
+  }
+
   findTransactionById({ transactionId }) {
     const query = "SELECT * FROM book_transactions WHERE transactionId=?";
     return this.#db.prepare(query).get(transactionId);
@@ -182,14 +191,5 @@ export class DbClient {
       this.#db.exec("ROLLBACK");
       return {};
     }
-  }
-
-  findBorrowedBooksByMemberId({ memberId }) {
-    const query =
-      `SELECT transactionId, bookId, title, author FROM book_transactions
-    INNER JOIN books USING(bookId)
-    WHERE memberId=? AND returnedAt IS NULL`;
-
-    return this.#db.prepare(query).all(memberId);
   }
 }
