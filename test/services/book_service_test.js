@@ -2,7 +2,12 @@ import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { mockRequests } from "../../data/mock_requests.js";
-import { addBook, removeBook } from "../../src/services/book_service.js";
+import {
+  addBook,
+  listAllBooks,
+  removeBook,
+  updateQuantity,
+} from "../../src/services/book_service.js";
 import { DbClient } from "../../src/db_client.js";
 import {
   ConflictError,
@@ -50,7 +55,7 @@ describe("Book services", () => {
   describe("Remove a book", () => {
     it("should throw validation error if input format is  Invalid", () => {
       assertThrows(
-        () => removeBook(dbClient, {}),
+        () => removeBook(dbClient, { bookId: "123" }),
         ValidationError,
         "Invalid input format",
       );
@@ -70,6 +75,48 @@ describe("Book services", () => {
     it("should delete book", () => {
       addBook(dbClient, bookDetails);
       assertEquals(removeBook(dbClient, { bookId: 1 }).status, 200);
+    });
+  });
+
+  describe("Update book quantity", () => {
+    it("should throw validation error if input format is  Invalid", () => {
+      assertThrows(
+        () => updateQuantity(dbClient, { bookId: "abc", quantity: "12" }),
+        ValidationError,
+        "Invalid input format",
+      );
+    });
+
+    it("should throw conflict error if given quantity is less than borrowed quantity", () => {
+      registerMember(dbClient, registrationDetails);
+      addBook(dbClient, bookDetails);
+      borrowBook(dbClient, { memberId: 1, bookId: 1 });
+      borrowBook(dbClient, { memberId: 1, bookId: 1 });
+      borrowBook(dbClient, { memberId: 1, bookId: 1 });
+      assertThrows(
+        () => updateQuantity(dbClient, { bookId: 1, quantity: 2 }),
+      );
+    });
+
+    it("should update the total book copies quantity", () => {
+      registerMember(dbClient, registrationDetails);
+      addBook(dbClient, bookDetails);
+      assertEquals(dbClient.findBookById({ bookId: 1 }).total, 5);
+      assertEquals(
+        updateQuantity(dbClient, { bookId: 1, quantity: 10 }).status,
+        200,
+      );
+      assertEquals(dbClient.findBookById({ bookId: 1 }).total, 10);
+    });
+  });
+
+  describe("List all books", () => {
+    it("should list all books", async () => {
+      addBook(dbClient, bookDetails);
+      const res = listAllBooks(dbClient);
+      const body = await res.json();
+      assertEquals(res.status, 200);
+      assertEquals(body.data.books[0].bookId, 1);
     });
   });
 });

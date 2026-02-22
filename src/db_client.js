@@ -119,6 +119,11 @@ export class DbClient {
     return this.#db.prepare(query).get(title, author);
   }
 
+  findAllBooks() {
+    const query = "SELECT * FROM books";
+    return this.#db.prepare(query).all();
+  }
+
   deleteBook({ bookId }) {
     const query = "DELETE FROM books WHERE bookId=?";
     return this.#db.prepare(query).run(bookId);

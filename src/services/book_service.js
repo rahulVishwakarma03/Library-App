@@ -1,4 +1,8 @@
-import { ConflictError, NotFoundError, ValidationError } from "../utils/custom_errors.js";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 import { validateInputType } from "../utils/utils.js";
 import { isString } from "./admin_service.js";
@@ -31,8 +35,10 @@ export const removeBook = (dbClient, { bookId }) => {
     throw new NotFoundError("Book not found");
   }
 
-  if(book.borrowed !== 0){
-    throw new ConflictError("Cannot delete book, Some book copies are still borrowed!");
+  if (book.borrowed !== 0) {
+    throw new ConflictError(
+      "Cannot delete book, Some book copies are still borrowed!",
+    );
   }
 
   dbClient.deleteBook({ bookId });
@@ -43,6 +49,31 @@ export const removeBook = (dbClient, { bookId }) => {
   });
 };
 
+export const updateQuantity = (dbClient, { bookId, quantity }) => {
+  validateInputType({ bookId, quantity }, isPositiveInteger);
+  const book = dbClient.findBookById({ bookId });
+
+  if (quantity < book.borrowed) {
+    throw new ConflictError(
+      "Total quantity cannot be less than borrowed quantity",
+    );
+  }
+
+  dbClient.updateBookQuantity({ bookId, quantity });
+  return createResponse(200, {
+    success: true,
+    message: "Book quantity updated successfully",
+  });
+};
+
+export const listAllBooks = (dbClient) => {
+  const books = dbClient.findAllBooks();
+  return createResponse(200, {
+    success: true,
+    data: { books },
+    message: "Successful",
+  });
+};
 // books/view should be in GET method.
 export const bookRouteHandler = {
   GET: {
