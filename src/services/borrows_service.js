@@ -2,7 +2,7 @@ import { AuthenticationError, NotFoundError } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 import { extractBearerToken, validateInputType } from "../utils/utils.js";
 
-const isInteger = (el) => Number.isInteger(el) && el >= 0;
+export const isPositiveInteger = (el) => Number.isInteger(el) && el > 0;
 
 const authorizeMember = (dbClient, request) => {
   const authToken = extractBearerToken(request);
@@ -13,7 +13,7 @@ const authorizeMember = (dbClient, request) => {
 };
 
 export const borrowBook = (dbClient, { bookId, memberId }) => {
-  validateInputType({ bookId, memberId }, isInteger);
+  validateInputType({ bookId, memberId }, isPositiveInteger);
 
   const book = dbClient.findBookById({ bookId });
   const member = dbClient.findMemberById({ memberId });
@@ -36,7 +36,7 @@ export const borrowBook = (dbClient, { bookId, memberId }) => {
 };
 
 export const returnBook = (dbClient, { transactionId }) => {
-  validateInputType({ transactionId }, isInteger);
+  validateInputType({ transactionId }, isPositiveInteger);
 
   const transaction = dbClient.findTransactionById({ transactionId });
 
@@ -52,7 +52,7 @@ export const returnBook = (dbClient, { transactionId }) => {
 };
 
 export const listBorrowed = (dbClient, { memberId }) => {
-  validateInputType({ memberId }, isInteger);
+  validateInputType({ memberId }, isPositiveInteger);
 
   const borrowedBooks = dbClient.findBorrowedBooksByMemberId({ memberId });
   return createResponse(200, {
@@ -62,6 +62,7 @@ export const listBorrowed = (dbClient, { memberId }) => {
   });
 };
 
+// /borrows/list should be a GET method and parse the searchParams to get the memberId
 export const borrowsRouteHandler = {
   "/borrows/borrow": (library, data) => library.borrowBook(data),
   "/borrows/return": (library, data) => library.returnBook(data),
@@ -73,7 +74,7 @@ export const handleBorrowService = async (library, request) => {
   const path = new URL(url).pathname;
 
   if (method === "POST" && path in borrowsRouteHandler) {
-    authorizeMember(dbClient, request);
+    // authorizeMember(dbClient, request);
     const body = await request.json();
     const handler = borrowsRouteHandler[path];
     return await handler(library, body);

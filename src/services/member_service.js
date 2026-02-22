@@ -7,6 +7,15 @@ import { createResponse } from "../utils/req_res_generator.js";
 import { extractBearerToken, validateInputType } from "../utils/utils.js";
 import { isString } from "./admin_service.js";
 
+export const authorizeAdmin = (dbClient, request) => {
+  const authToken = extractBearerToken(request);
+  const admin = dbClient.findAdminById({ adminId: authToken });
+
+  if (!admin) {
+    throw new AuthenticationError("Unauthorized!");
+  }
+};
+
 export const registerMember = (dbClient, { name, email, password }) => {
   validateInputType({ name, email, password }, isString);
 
@@ -40,14 +49,9 @@ export const loginMember = (dbClient, { email, password }) => {
 };
 
 export const listMembers = (dbClient, request) => {
-  const authToken = extractBearerToken(request);
-  const admin = dbClient.findAdminById({ adminId: authToken });
-
-  if (!admin) {
-    throw new AuthenticationError("Unauthorized!");
-  }
-
+  authorizeAdmin(dbClient, request);
   const members = dbClient.findAllMembers();
+
   return createResponse(200, {
     success: true,
     data: { members },

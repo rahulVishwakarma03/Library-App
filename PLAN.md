@@ -126,7 +126,7 @@
   title, text, not null
   author, text , not null
   total, Integer > 0, not null
-  borrowed, Integer >= 0
+  borrowed, Integer >= 0 && <= total
   UNIQUE(title, author)
 
   ## Borrows table

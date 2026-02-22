@@ -1,5 +1,28 @@
-import { NotFoundError } from "../utils/custom_errors.js";
+import { ConflictError, NotFoundError } from "../utils/custom_errors.js";
+import { createResponse } from "../utils/req_res_generator.js";
+import { validateInputType } from "../utils/utils.js";
+import { isString } from "./admin_service.js";
+import { isPositiveInteger } from "./borrows_service.js";
+import { authorizeAdmin } from "./member_service.js";
 
+export const addBook = (dbClient, { title, author, total }) => {
+  validateInputType({ title, author }, isString);
+  validateInputType({ total }, isPositiveInteger);
+
+  const book = dbClient.findBookByTitleAndAuthor({ title, author });
+
+  if (book) {
+    throw new ConflictError("Book already exists");
+  }
+
+  dbClient.createBook({ title, author, total });
+  return createResponse(201, {
+    success: true,
+    message: "Book added successfully",
+  });
+};
+
+// books/view should be in GET method.
 export const bookRouteHandler = {
   GET: {
     "/books/list": (library, data) => library.listAllBooks(data),
@@ -22,6 +45,7 @@ export const handleBookService = async (library, request) => {
   }
 
   if (method === "POST" && path in bookRouteHandler.POST) {
+    // authorizeAdmin(dbClient, request);
     const body = await request.json();
     const handler = bookRouteHandler.POST[path];
     return await handler(library, body);
