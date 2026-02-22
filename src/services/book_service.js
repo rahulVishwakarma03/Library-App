@@ -1,4 +1,4 @@
-import { ConflictError, NotFoundError } from "../utils/custom_errors.js";
+import { ConflictError, NotFoundError, ValidationError } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 import { validateInputType } from "../utils/utils.js";
 import { isString } from "./admin_service.js";
@@ -19,6 +19,27 @@ export const addBook = (dbClient, { title, author, total }) => {
   return createResponse(201, {
     success: true,
     message: "Book added successfully",
+  });
+};
+
+export const removeBook = (dbClient, { bookId }) => {
+  validateInputType({ bookId }, isPositiveInteger);
+
+  const book = dbClient.findBookById({ bookId });
+
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+
+  if(book.borrowed !== 0){
+    throw new ConflictError("Cannot delete book, Some book copies are still borrowed!");
+  }
+
+  dbClient.deleteBook({ bookId });
+
+  return createResponse(200, {
+    success: true,
+    message: "Book deleted successfully",
   });
 };
 
