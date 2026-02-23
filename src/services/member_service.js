@@ -4,12 +4,12 @@ import {
   NotFoundError,
 } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
-import { extractBearerToken, validateInputType } from "../utils/utils.js";
+import { parseBearerToken, validateInputType } from "../utils/utils.js";
 import { isString } from "./admin_service.js";
 
 export const authorizeAdmin = (dbClient, request) => {
-  const authToken = extractBearerToken(request);
-  const admin = dbClient.findAdminById({ adminId: authToken });
+  const adminId = parseBearerToken(request);
+  const admin = dbClient.findAdminById({ adminId });
 
   if (!admin) {
     throw new AuthenticationError("Unauthorized!");
@@ -61,27 +61,28 @@ export const listMembers = (dbClient, request) => {
 
 export const memberRouteHandlers = {
   GET: {
-    "/members/list": (library) => library.listAllCustomers(),
+    "/members/list": listMembers,
   },
   POST: {
-    "/members/register": (library, data) => library.registerCustomer(data),
-    "/members/login": (library, data) => library.loginCustomer(data),
+    "/members/register": registerMember,
+    "/members/login": loginMember,
   },
 };
 
-export const handleMemberService = async (library, request) => {
+export const handleMemberService = async (dbClient, request) => {
   const { url, method } = request;
   const path = new URL(url).pathname;
 
   if (method === "GET" && path in memberRouteHandlers.GET) {
     const handler = memberRouteHandlers.GET[path];
-    return await handler(library, request);
+    return await handler(dbClient, request);
   }
 
   if (method === "POST" && path in memberRouteHandlers.POST) {
     const body = await request.json();
     const handler = memberRouteHandlers.POST[path];
-    return await handler(library, body);
+    return await handler(dbClient, body);
   }
+
   throw new NotFoundError("Path not found");
 };

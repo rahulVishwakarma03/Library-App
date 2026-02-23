@@ -12,21 +12,21 @@ const resourceHandlers = {
   "borrows": handleBorrowService,
 };
 
-const route = async (library, request) => {
+const route = async (dbClient, request) => {
   const path = new URL(request.url).pathname;
-  const resource = path.split("/")[1];
+  const resourceName = path.split("/")[1];
 
-  if (resource in resourceHandlers) {
-    const handler = resourceHandlers[resource];
-    return await handler(library, request);
+  if (resourceName in resourceHandlers) {
+    const handler = resourceHandlers[resourceName];
+    return await handler(dbClient, request);
   }
 
   throw new NotFoundError("Path not found!");
 };
 
-export const handleRequest = async (library, request) => {
+export const handleRequest = async (dbClient, request) => {
   try {
-    return await route(library, request);
+    return await route(dbClient, request);
   } catch (error) {
     return createResponse(error.status, {
       success: false,
@@ -36,5 +36,5 @@ export const handleRequest = async (library, request) => {
   }
 };
 
-export const createRequestHandler = (library) => async (request) =>
-  await handleRequest(library, request);
+export const createRequestHandler = (dbClient) => async (request) =>
+  await handleRequest(dbClient, request);

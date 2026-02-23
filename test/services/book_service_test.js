@@ -11,6 +11,7 @@ import {
 import { DbClient } from "../../src/db_client.js";
 import {
   ConflictError,
+  NotFoundError,
   ValidationError,
 } from "../../src/utils/custom_errors.js";
 import { borrowBook } from "../../src/services/borrows_service.js";
@@ -19,14 +20,12 @@ import { registerMember } from "../../src/services/member_service.js";
 describe("Book services", () => {
   let dbClient;
   let registrationDetails;
-  let loginDetails;
   let bookDetails;
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
     registrationDetails = mockRequests.registerAdmin.body;
-    loginDetails = mockRequests.loginAdmin.body;
     bookDetails = mockRequests.addBook.body;
   });
 
@@ -50,6 +49,15 @@ describe("Book services", () => {
     it("should add book", () => {
       assertEquals(addBook(dbClient, bookDetails).status, 201);
     });
+
+    it("should throw conflict error if book already exists", () => {
+      addBook(dbClient, bookDetails);
+      assertThrows(
+        () => addBook(dbClient, bookDetails),
+        ConflictError,
+        "Book already exists",
+      );
+    });
   });
 
   describe("Remove a book", () => {
@@ -58,6 +66,14 @@ describe("Book services", () => {
         () => removeBook(dbClient, { bookId: "123" }),
         ValidationError,
         "Invalid input format",
+      );
+    });
+    
+    it("should throw not found error if book is not present", () => {
+      assertThrows(
+        () => removeBook(dbClient, { bookId: 1 }),
+        NotFoundError,
+        "Book not found",
       );
     });
 

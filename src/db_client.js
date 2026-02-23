@@ -1,3 +1,5 @@
+import { ServerError } from "./utils/custom_errors.js";
+
 export class DbClient {
   #db;
   constructor(db) {
@@ -186,10 +188,6 @@ export class DbClient {
         date.toLocaleString(),
         transactionId,
       );
-
-      if (trans.changes === 0) {
-        throw new Error("Wrong transactionId");
-      }
       this.#db.exec("COMMIT");
       return trans;
     } catch {

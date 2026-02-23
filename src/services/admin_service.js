@@ -41,18 +41,18 @@ export const loginAdmin = (dbClient, { email, password }) => {
 };
 
 export const adminRouteHandlers = {
-  "/admins/register": (library, data) => library.registerAdmin(data),
-  "/admins/login": (library, data) => library.loginAdmin(data),
+  "/admins/register": registerAdmin,
+  "/admins/login": loginAdmin,
 };
 
-export const handleAdminService = async (library, request) => {
+export const handleAdminService = async (dbClient, request) => {
   const { url, method } = request;
   const path = new URL(url).pathname;
 
   if (method === "POST" && path in adminRouteHandlers) {
     const body = await request.json();
     const handler = adminRouteHandlers[path];
-    return await handler(library, body);
+    return await handler(dbClient, body);
   }
 
   throw new NotFoundError("Path not found");

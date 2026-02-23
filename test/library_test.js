@@ -9,7 +9,7 @@ import {
   ValidationError,
 } from "../src/utils/custom_errors.js";
 
-describe.ignore("Library", () => {
+describe("Library", () => {
   let library;
   let registrationDetails;
   let loginDetails;

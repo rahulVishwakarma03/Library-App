@@ -1,8 +1,4 @@
-import {
-  ConflictError,
-  NotFoundError,
-  ValidationError,
-} from "../utils/custom_errors.js";
+import { ConflictError, NotFoundError } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 import { validateInputType } from "../utils/utils.js";
 import { isString } from "./admin_service.js";
@@ -74,33 +70,32 @@ export const listAllBooks = (dbClient) => {
     message: "Successful",
   });
 };
-// books/view should be in GET method.
+
 export const bookRouteHandler = {
   GET: {
-    "/books/list": (library, data) => library.listAllBooks(data),
+    "/books/list": listAllBooks,
   },
   POST: {
-    "/books/add": (library, data) => library.addBook(data),
-    "/books/updateQuantity": (library, data) => library.updateQuantity(data),
-    "/books/view": (library, data) => library.viewBook(data),
-    "/books/remove": (library, data) => library.removeBook(data),
+    "/books/add": addBook,
+    "/books/updateQuantity": updateQuantity,
+    "/books/remove": removeBook,
   },
 };
 
-export const handleBookService = async (library, request) => {
+export const handleBookService = async (dbClient, request) => {
   const { url, method } = request;
   const path = new URL(url).pathname;
-
   if (method === "GET" && path in bookRouteHandler.GET) {
     const handler = bookRouteHandler.GET[path];
-    return await handler(library);
+    return await handler(dbClient);
   }
 
   if (method === "POST" && path in bookRouteHandler.POST) {
-    // authorizeAdmin(dbClient, request);
+    authorizeAdmin(dbClient, request);
+
     const body = await request.json();
     const handler = bookRouteHandler.POST[path];
-    return await handler(library, body);
+    return await handler(dbClient, body);
   }
 
   throw new NotFoundError("Path not found");

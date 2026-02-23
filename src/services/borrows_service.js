@@ -1,11 +1,11 @@
 import { AuthenticationError, NotFoundError } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
-import { extractBearerToken, validateInputType } from "../utils/utils.js";
+import { parseBearerToken, validateInputType } from "../utils/utils.js";
 
 export const isPositiveInteger = (el) => Number.isInteger(el) && el > 0;
 
 const authorizeMember = (dbClient, request) => {
-  const authToken = extractBearerToken(request);
+  const authToken = parseBearerToken(request);
   const member = dbClient.findMemberById({ memberId: authToken });
   if (!member) {
     throw new AuthenticationError("Unauthorized!");
@@ -62,22 +62,33 @@ export const listBorrowed = (dbClient, { memberId }) => {
   });
 };
 
-// /borrows/list should be a GET method and parse the searchParams to get the memberId
 export const borrowsRouteHandler = {
-  "/borrows/borrow": (library, data) => library.borrowBook(data),
-  "/borrows/return": (library, data) => library.returnBook(data),
-  "/borrows/list": (library, data) => library.listBorrowed(data),
+  GET: {
+    "/borrows/list": listBorrowed,
+  },
+  POST: {
+    "/borrows/borrow": borrowBook,
+    "/borrows/return": returnBook,
+  },
 };
 
-export const handleBorrowService = async (library, request) => {
-  const { url, method } = request;
-  const path = new URL(url).pathname;
+export const handleBorrowService = async (dbClient, request) => {
+  const { method } = request;
+  const url = new URL(request.url);
+  const path = url.pathname;
 
-  if (method === "POST" && path in borrowsRouteHandler) {
-    // authorizeMember(dbClient, request);
+  if (method === "POST" && path in borrowsRouteHandler.POST) {
+    authorizeMember(dbClient, request);
     const body = await request.json();
-    const handler = borrowsRouteHandler[path];
-    return await handler(library, body);
+    const handler = borrowsRouteHandler.POST[path];
+    return await handler(dbClient, body);
+  }
+
+  if (method === "GET" && path in borrowsRouteHandler.GET) {
+    authorizeMember(dbClient, request);
+    const handler = borrowsRouteHandler.GET[path];
+    const memberId = url.searchParams.get("memberId");
+    return await handler(dbClient, { memberId: Number(memberId) });
   }
   throw new NotFoundError("Path not found");
 };

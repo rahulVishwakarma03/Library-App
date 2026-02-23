@@ -7,12 +7,13 @@ export const createResponse = (status, body) => {
   });
 };
 
-export const createRequest = ({ url, method, body }) => {
+export const createRequest = ({ url, method, body }, token) => {
   return new Request(url, {
     method,
     body: JSON.stringify(body),
     headers: {
       "content-type": "application/json",
+      "authorization": `Bearer ${token}`,
     },
   });
 };

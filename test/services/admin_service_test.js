@@ -21,6 +21,7 @@ describe("Admin services", () => {
     loginDetails = mockRequests.loginAdmin.body;
   });
 
+
   describe("Register Admin", () => {
     it("should throw validation error if inputs are not provided", () => {
       assertThrows(

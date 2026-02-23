@@ -30,7 +30,6 @@ export const mockRequests = {
     url: URL + "/books/add",
     method: "POST",
     body: {
-      // adminId: 1,
       title: "Let Us C",
       author: "Yaswant Kanetkar",
       total: 5,
@@ -39,7 +38,7 @@ export const mockRequests = {
   updateQuantity: {
     url: URL + "/books/updateQuantity",
     method: "POST",
-    body: { bookId: 1, offset: 4 },
+    body: { bookId: 1, quantity: 4 },
   },
   viewBook: {
     url: URL + "/books/view",
@@ -62,16 +61,15 @@ export const mockRequests = {
   borrowBook: {
     url: URL + "/borrows/borrow",
     method: "POST",
-    body: { customerId: 1, bookId: 1 },
+    body: { memberId: 1, bookId: 1 },
   },
   listBorrowed: {
-    url: URL + "/borrows/list",
-    method: "POST",
-    body: { customerId: 1 },
+    url: URL + "/borrows/list?memberId=1",
+    method: "GET",
   },
   returnBook: {
     url: URL + "/borrows/return",
     method: "POST",
-    body: { customerId: 1, bookId: 1 },
+    body: { transactionId: 1 },
   },
 };

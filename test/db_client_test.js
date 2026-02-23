@@ -3,6 +3,7 @@ import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../src/db_client.js";
 import { mockRequests } from "../data/mock_requests.js";
+import { ServerError } from "../src/utils/custom_errors.js";
 
 describe("DB Client", () => {
   let dbClient;
@@ -15,6 +16,18 @@ describe("DB Client", () => {
     registrationDetails = mockRequests.registerCustomer.body;
     loginDetails = mockRequests.loginCustomer.body;
     bookDetails = mockRequests.addBook.body;
+  });
+
+  describe("create dbClient", () => {
+    it("should throw server error if db is undefined", () => {
+      assertThrows(() => new DbClient(), ServerError, "db doesn't exist");
+    });
+
+    it("should create dbClient", () => {
+      const db = new DatabaseSync(":memory:");
+      const dbClient = new DbClient(db);
+      assertEquals(typeof dbClient, "object");
+    });
   });
 
   describe("Find Table", () => {

@@ -1,7 +1,7 @@
 import { ValidationError } from "./custom_errors.js";
 
-export const extractBearerToken = (request) => {
-  const authHeader = request.headers.get("authorization");
+export const parseBearerToken = (request) => {
+  const authHeader = request.headers.get("authorization") || "";
   const authToken = authHeader.split(" ")[1];
   return parseInt(authToken);
 };
