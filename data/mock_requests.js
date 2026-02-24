@@ -1,7 +1,7 @@
 const URL = "http://localhost:8000";
 
 export const mockRequests = {
-  registerCustomer: {
+  registerMember: {
     url: URL + "/members/register",
     method: "POST",
     body: { name: "abc", email: "abc@gmail.com", password: "1234" },
@@ -11,12 +11,12 @@ export const mockRequests = {
     method: "POST",
     body: { name: "abc", email: "abc@gmail.com", password: "1234" },
   },
-  loginCustomer: {
+  loginMember: {
     url: URL + "/members/login",
     method: "POST",
     body: { email: "abc@gmail.com", password: "1234" },
   },
-  invalidCustomerLoginDetails: {
+  invalidMemberLoginDetails: {
     url: URL + "/members/login",
     method: "POST",
     body: { email: "abc12@gmail.com", password: "1234" },
@@ -54,7 +54,7 @@ export const mockRequests = {
     url: URL + "/books/list",
     method: "GET",
   },
-  listAllCustomers: {
+  listAllMembers: {
     url: URL + "/members/list",
     method: "GET",
   },

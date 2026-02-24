@@ -22,8 +22,8 @@ describe("Member services", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerCustomer.body;
-    loginDetails = mockRequests.loginCustomer.body;
+    registrationDetails = mockRequests.registerMember.body;
+    loginDetails = mockRequests.loginMember.body;
   });
 
   describe("Register Member", () => {

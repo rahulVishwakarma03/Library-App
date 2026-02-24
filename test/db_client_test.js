@@ -13,8 +13,8 @@ describe("DB Client", () => {
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
-    registrationDetails = mockRequests.registerCustomer.body;
-    loginDetails = mockRequests.loginCustomer.body;
+    registrationDetails = mockRequests.registerMember.body;
+    loginDetails = mockRequests.loginMember.body;
     bookDetails = mockRequests.addBook.body;
   });
 

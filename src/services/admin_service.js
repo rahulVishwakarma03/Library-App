@@ -11,8 +11,9 @@ export const isString = (el) => typeof el === "string" && el !== "";
 export const registerAdmin = (dbClient, { name, email, password }) => {
   validateInputType({ name, email, password }, isString);
 
-  const admin = dbClient.findAdminByEmail({ email });
-  if (admin) {
+  const existingAdmin = dbClient.findAdminByEmail({ email });
+
+  if (existingAdmin) {
     throw new ConflictError("Admin already exists");
   }
 

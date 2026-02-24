@@ -19,8 +19,8 @@ export const authorizeAdmin = (dbClient, request) => {
 export const registerMember = (dbClient, { name, email, password }) => {
   validateInputType({ name, email, password }, isString);
 
-  const member = dbClient.findMemberByEmail({ email });
-  if (member) {
+  const existingMember = dbClient.findMemberByEmail({ email });
+  if (existingMember) {
     throw new ConflictError("Member already exists");
   }
 

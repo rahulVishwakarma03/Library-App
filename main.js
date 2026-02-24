@@ -1,8 +1,17 @@
-import { agent } from "./src/user_interface/agent.js";
-import { uiManager } from "./src/user_interface/ui_manager.js";
+import { DatabaseSync } from "node:sqlite";
+import { DbClient } from "./src/db_client.js";
+import { createRequestHandler } from "./src/app.js";
 
-const main = async (agent) => {
-  await uiManager(agent);
+const onListen = ({ port }) => console.log(`Server started at ${port}...`);
+
+const main = (port) => {
+  const db = new DatabaseSync("./db/library.db");
+  const dbClient = new DbClient(db);
+  dbClient.initializeSchema();
+
+  const requestHandler = createRequestHandler(dbClient);
+
+  Deno.serve({ port, onListen }, requestHandler);
 };
 
-await main(agent);
+main(8000);

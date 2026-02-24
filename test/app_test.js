@@ -1,6 +1,6 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
-import { assertEquals, assertThrows } from "@std/assert";
-import { createRequestHandler } from "../src/request_handler.js";
+import { assertEquals } from "@std/assert";
+import { createRequestHandler } from "../src/app.js";
 import { mockRequests } from "../data/mock_requests.js";
 import { createRequest } from "../src/utils/req_res_generator.js";
 import { DatabaseSync } from "node:sqlite";
@@ -62,36 +62,36 @@ describe("Request handler", () => {
     });
 
     it("member registration request", async () => {
-      const request = createRequest(mockRequests.registerCustomer);
+      const request = createRequest(mockRequests.registerMember);
       const response = await handleRequest(request);
       assertEquals(response.status, 201);
     });
 
     it("member login request", async () => {
-      const regReq = createRequest(mockRequests.registerCustomer);
+      const regReq = createRequest(mockRequests.registerMember);
       await handleRequest(regReq);
-      const loginReq = createRequest(mockRequests.loginCustomer);
+      const loginReq = createRequest(mockRequests.loginMember);
       const response = await handleRequest(loginReq);
       assertEquals(response.status, 200);
     });
 
     it("member login request with wrong details", async () => {
-      const request = createRequest(mockRequests.invalidCustomerLoginDetails);
+      const request = createRequest(mockRequests.invalidMemberLoginDetails);
       const response = await handleRequest(request);
 
       assertEquals(response.status, 401);
     });
 
-    it("list all customers request", async () => {
+    it("list all members request", async () => {
       handleRequest(createRequest(mockRequests.registerAdmin));
       const loginReq = createRequest(mockRequests.loginAdmin);
       const res = await handleRequest(loginReq);
       const { token } = await res.json();
-      const listCustomerReq = createRequest(
-        mockRequests.listAllCustomers,
+      const listMembersReq = createRequest(
+        mockRequests.listAllMembers,
         token,
       );
-      const response = await handleRequest(listCustomerReq);
+      const response = await handleRequest(listMembersReq);
 
       assertEquals(response.status, 200);
     });
@@ -151,9 +151,9 @@ describe("Request handler", () => {
   describe("borrows resource", () => {
     let token;
     beforeEach(async () => {
-      const memberRegReq = createRequest(mockRequests.registerCustomer);
+      const memberRegReq = createRequest(mockRequests.registerMember);
       const adminRegReq = createRequest(mockRequests.registerAdmin);
-      const memberLoginReq = createRequest(mockRequests.loginCustomer);
+      const memberLoginReq = createRequest(mockRequests.loginMember);
       const adminLoginReq = createRequest(mockRequests.loginAdmin);
       await handleRequest(memberRegReq);
       await handleRequest(adminRegReq);

@@ -9,9 +9,9 @@ export const addBook = (dbClient, { title, author, total }) => {
   validateInputType({ title, author }, isString);
   validateInputType({ total }, isPositiveInteger);
 
-  const book = dbClient.findBookByTitleAndAuthor({ title, author });
+  const existingBook = dbClient.findBookByTitleAndAuthor({ title, author });
 
-  if (book) {
+  if (existingBook) {
     throw new ConflictError("Book already exists");
   }
 
@@ -64,6 +64,7 @@ export const updateQuantity = (dbClient, { bookId, quantity }) => {
 
 export const listAllBooks = (dbClient) => {
   const books = dbClient.findAllBooks();
+
   return createResponse(200, {
     success: true,
     data: { books },

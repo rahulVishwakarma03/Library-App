@@ -22,7 +22,7 @@ describe("Borrows service", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerCustomer.body;
+    registrationDetails = mockRequests.registerMember.body;
     bookDetails = mockRequests.addBook.body;
   });
 
