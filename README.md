@@ -97,14 +97,14 @@ Stores all persistent data:
 - title
 - author
 - total
-- available
+- borrowed
 
 **Constraints:**
 
 - bookId → PRIMARY KEY
 - UNIQUE(title, author)
 - total > 0
-- available ≥ 0
+- borrowed ≥ 0 AND <= total
 
 ---
 
@@ -140,12 +140,14 @@ Stores all persistent data:
 
 ---
 
-## 4️⃣ BorrowedBooks Table
+## 4️⃣ book_transactions Table
 
 **Columns:**
 
 - bookId (Foreign Key)
 - memberId (Foreign Key)
+- borrowedAt
+- returnedAt
 
 **Relationships:**
 
@@ -160,15 +162,15 @@ Stores all persistent data:
 
 1. Member logs in.
 2. Member selects a book.
-3. System checks if `available > 0`.
-4. Create entry in BorrowedBooks table.
-5. Decrease `available` count by 1.
+3. System checks if book is available.
+4. Create entry in book_transactions table.
+5. Increase `borrowed` count by 1.
 
 ## Return Book Flow
 
 1. Member selects borrowed book.
 2. Remove entry from BorrowedBooks table.
-3. Increase `available` count by 1.
+3. Decrease `borrowed` count by 1.
 
 ---
 
