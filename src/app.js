@@ -1,40 +1,30 @@
-import { handleAdminService } from "./services/admin_service.js";
-import { handleBookService } from "./services/book_service.js";
-import { handleBorrowService } from "./services/borrows_service.js";
-import { handleMemberService } from "./services/member_service.js";
-import { NotFoundError } from "./utils/custom_errors.js";
-import { createResponse } from "./utils/req_res_generator.js";
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import { createAdminRoute } from "./routes/admin.js";
 
-const resourceHandlers = {
-  "admins": handleAdminService,
-  "members": handleMemberService,
-  "books": handleBookService,
-  "borrows": handleBorrowService,
-};
+export const createAPP = (dbClient) => {
+  const app = new Hono();
+  const admin = createAdminRoute();
 
-const route = async (dbClient, request) => {
-  const path = new URL(request.url).pathname;
-  const resourceName = path.split("/")[1];
+  app.use(logger());
+  app.use(async (c, next) => {
+    c.set("dbClient", dbClient);
+    await next();
+  });
 
-  if (resourceName in resourceHandlers) {
-    const handler = resourceHandlers[resourceName];
-    return await handler(dbClient, request);
-  }
+  app.get("/", (c) => {
+    return c.text("hello");
+  });
 
-  throw new NotFoundError("Path not found!");
-};
+  app.route("/admins", admin);
 
-export const handleRequest = async (dbClient, request) => {
-  try {
-    return await route(dbClient, request);
-  } catch (error) {
-    return createResponse(error.status, {
-      success: false,
+  app.onError((error, c) => {
+    return c.json({
+      success: error.success,
       errorName: error.name,
       message: error.message,
-    });
-  }
-};
+    }, error.status);
+  });
 
-export const createRequestHandler = (dbClient) => async (request) =>
-  await handleRequest(dbClient, request);
+  return app;
+};

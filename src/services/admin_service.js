@@ -3,42 +3,35 @@ import {
   ConflictError,
   NotFoundError,
 } from "../utils/custom_errors.js";
-import { createResponse } from "../utils/req_res_generator.js";
-import { validateInputType } from "../utils/utils.js";
-
-export const isString = (el) => typeof el === "string" && el !== "";
 
 export const registerAdmin = (dbClient, { name, email, password }) => {
-  validateInputType({ name, email, password }, isString);
-
   const existingAdmin = dbClient.findAdminByEmail({ email });
 
   if (existingAdmin) {
     throw new ConflictError("Admin already exists");
   }
 
-  dbClient.createAdmin({ name, email, password });
+  const res = dbClient.createAdmin({ name, email, password });
 
-  return createResponse(201, {
+  return {
     success: true,
+    data: { adminId: res.lastInsertRowid },
     message: "Admin Registered Successfully",
-  });
+  };
 };
 
 export const loginAdmin = (dbClient, { email, password }) => {
-  validateInputType({ email, password }, isString);
-
   const admin = dbClient.findAdminByEmailAndPassword({ email, password });
 
   if (!admin) {
     throw new AuthenticationError("Wrong login details");
   }
 
-  return createResponse(200, {
+  return {
     success: true,
-    token: admin.adminId,
+    data: { adminId: admin.adminId },
     message: "Admin loggedIn Successfully",
-  });
+  };
 };
 
 export const adminRouteHandlers = {

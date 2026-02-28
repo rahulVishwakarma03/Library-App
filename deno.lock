@@ -9,7 +9,8 @@
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/testing@^1.0.17": "1.0.17",
     "npm:@inquirer/prompts@^8.2.0": "8.2.0",
-    "npm:@types/node@*": "24.2.0"
+    "npm:@types/node@*": "24.2.0",
+    "npm:hono@^4.12.3": "4.12.3"
   },
   "jsr": {
     "@std/assert@1.0.18": {
@@ -192,6 +193,9 @@
     "get-east-asian-width@1.4.0": {
       "integrity": "sha512-QZjmEOC+IT1uk6Rx0sX22V6uHWVwbdbxf1faPqJ1QhLdGgsRGCZoyaQBm/piRdJy/D2um6hM1UP7ZEeQ4EkP+Q=="
     },
+    "hono@4.12.3": {
+      "integrity": "sha512-SFsVSjp8sj5UumXOOFlkZOG6XS9SJDKw0TbwFeV+AJ8xlST8kxK5Z/5EYa111UY8732lK2S/xB653ceuaoGwpg=="
+    },
     "iconv-lite@0.7.2": {
       "integrity": "sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==",
       "dependencies": [
@@ -237,7 +241,8 @@
     "dependencies": [
       "jsr:@std/assert@1",
       "jsr:@std/testing@^1.0.17",
-      "npm:@inquirer/prompts@^8.2.0"
+      "npm:@inquirer/prompts@^8.2.0",
+      "npm:hono@^4.12.3"
     ]
   }
 }

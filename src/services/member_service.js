@@ -5,7 +5,7 @@ import {
 } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
 import { parseBearerToken, validateInputType } from "../utils/utils.js";
-import { isString } from "./admin_service.js";
+import { isString } from "../utils/utils.js";
 
 export const authorizeAdmin = (dbClient, request) => {
   const adminId = parseBearerToken(request);
@@ -19,8 +19,8 @@ export const authorizeAdmin = (dbClient, request) => {
 export const registerMember = (dbClient, { name, email, password }) => {
   validateInputType({ name, email, password }, isString);
 
-  const existingMember = dbClient.findMemberByEmail({ email });
-  if (existingMember) {
+  const existing = dbClient.findMemberByEmail({ email });
+  if (existing) {
     throw new ConflictError("Member already exists");
   }
 

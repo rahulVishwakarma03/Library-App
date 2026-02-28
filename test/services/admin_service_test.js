@@ -6,6 +6,7 @@ import { mockRequests } from "../../data/mock_requests.js";
 import { loginAdmin, registerAdmin } from "../../src/services/admin_service.js";
 import {
   AuthenticationError,
+  ConflictError,
   ValidationError,
 } from "../../src/utils/custom_errors.js";
 
@@ -21,52 +22,22 @@ describe("Admin services", () => {
     loginDetails = mockRequests.loginAdmin.body;
   });
 
-
   describe("Register Admin", () => {
-    it("should throw validation error if inputs are not provided", () => {
-      assertThrows(
-        () => registerAdmin(dbClient, {}),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
-    it("should throw validation error if input format is not valid", () => {
-      assertThrows(
-        () => registerAdmin(dbClient, { name: 2, email: "", password: "" }),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
     it("should register if input is valid", () => {
       const res = registerAdmin(dbClient, registrationDetails);
-      assertEquals(res.status, 201);
+      assertEquals(res.success, true);
     });
 
     it("should throw conflict error if admin already exists with the same email", () => {
       registerAdmin(dbClient, registrationDetails);
-      assertThrows(() => registerAdmin(dbClient, registrationDetails));
+      assertThrows(
+        () => registerAdmin(dbClient, registrationDetails),
+        ConflictError,
+      );
     });
   });
 
   describe("Login Admin", () => {
-    it("should throw validation error if inputs are not provided", () => {
-      assertThrows(
-        () => loginAdmin(dbClient, {}),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
-    it("should throw validation error if input format is not valid", () => {
-      assertThrows(
-        () => loginAdmin(dbClient, { email: "", password: "" }),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
     it("should throw authentication error if login details is wrong", () => {
       assertThrows(
         () => loginAdmin(dbClient, loginDetails),
@@ -75,11 +46,10 @@ describe("Admin services", () => {
       );
     });
 
-    it("should login if login details is correct", async () => {
+    it("should login if login details is correct", () => {
       registerAdmin(dbClient, registrationDetails);
       const res = loginAdmin(dbClient, loginDetails);
-      const body = await res.json();
-      assertEquals(body.success, true);
+      assertEquals(res.success, true);
     });
   });
 });

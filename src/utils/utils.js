@@ -12,3 +12,5 @@ export const validateInputType = (inputs, predicate) => {
     throw new ValidationError("Invalid input format");
   }
 };
+
+export const isString = (el) => typeof el === "string" && el !== "";

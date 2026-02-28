@@ -106,11 +106,11 @@ describe("Member services", () => {
     it("should list all members", async () => {
       registerAdmin(dbClient, registrationDetails);
       const loginRes = loginAdmin(dbClient, loginDetails);
-      const loginBody = await loginRes.json();
+      const adminId = loginRes.data.adminId;
       const req = new Request("http://localhost:8000/members/list", {
         method: "GET",
         headers: {
-          authorization: `Bearer ${loginBody.token}`,
+          authorization: `Bearer ${adminId}`,
         },
       });
       const res = listMembers(dbClient, req);

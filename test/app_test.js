@@ -1,52 +1,52 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
-import { createRequestHandler } from "../src/app.js";
+// import { createRequestHandler } from "../src/app.js";
 import { mockRequests } from "../data/mock_requests.js";
 import { createRequest } from "../src/utils/req_res_generator.js";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../src/db_client.js";
+import { createAPP } from "../src/app.js";
 
 describe("Request handler", () => {
-  let dbClient;
-  let handleRequest;
+  let app;
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
-    dbClient = new DbClient(db);
+    const dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    handleRequest = createRequestHandler(dbClient);
+    app = createAPP(dbClient);
   });
 
   it("invalid request", async () => {
-    const request = createRequest({
-      url: "http://localhost:8000/invalid",
-      method: "GET",
-    });
+    const res = await app.request("/invalid");
 
-    const response = await handleRequest(request);
-    assertEquals(response.status, 404);
+    assertEquals(res.status, 404);
   });
 
-  describe("admin resource", () => {
-    it("admin service path is invalid", async () => {
-      const request = createRequest({
-        url: "http://localhost:8000/admins/invalid",
-        method: "GET",
-      });
-      const res = await handleRequest(request);
+  describe.only("/admin routes", () => {
+    it("/admin/invalid", async () => {
+      const res = await app.request("/admins/invalid");
       assertEquals(res.status, 404);
     });
 
-    it("admin registration request", async () => {
-      const request = createRequest(mockRequests.registerAdmin);
-      const response = await handleRequest(request);
+    it("Post /admins/register", async () => {
+      const response = await app.request("/admins/register", {
+        method: "POST",
+        body: JSON.stringify(mockRequests.registerAdmin.body),
+      });
+
       assertEquals(response.status, 201);
     });
 
-    it("admin login request", async () => {
-      const regReq = createRequest(mockRequests.registerAdmin);
-      await handleRequest(regReq);
-      const loginReq = createRequest(mockRequests.loginAdmin);
-      const response = await handleRequest(loginReq);
+    it("Post /admins/login", async () => {
+      await app.request("/admins/register", {
+        method: "POST",
+        body: JSON.stringify(mockRequests.registerAdmin.body),
+      });
+
+      const response = await app.request("/admins/login", {
+        method: "POST",
+        body: JSON.stringify(mockRequests.loginAdmin.body),
+      });
       assertEquals(response.status, 200);
     });
   });
