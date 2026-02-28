@@ -17,46 +17,42 @@ export const authorizeAdmin = (dbClient, request) => {
 };
 
 export const registerMember = (dbClient, { name, email, password }) => {
-  validateInputType({ name, email, password }, isString);
-
   const existing = dbClient.findMemberByEmail({ email });
   if (existing) {
     throw new ConflictError("Member already exists");
   }
 
-  dbClient.createMember({ name, email, password });
+  const res = dbClient.createMember({ name, email, password });
 
-  return createResponse(201, {
+  return {
     success: true,
+    data: { adminId: res.lastInsertRowid },
     message: "Member Registered Successfully",
-  });
+  };
 };
 
 export const loginMember = (dbClient, { email, password }) => {
-  validateInputType({ email, password }, isString);
-
   const member = dbClient.findMemberByEmailAndPassword({ email, password });
 
   if (!member) {
     throw new AuthenticationError("Wrong login details");
   }
 
-  return createResponse(200, {
+  return {
     success: true,
-    token: member.memberId,
+    data: { memberId: member.memberId },
     message: "Member loggedIn Successfully",
-  });
+  };
 };
 
-export const listMembers = (dbClient, request) => {
-  authorizeAdmin(dbClient, request);
+export const listMembers = (dbClient) => {
   const members = dbClient.findAllMembers();
 
-  return createResponse(200, {
+  return {
     success: true,
     data: { members },
     message: "Successful",
-  });
+  };
 };
 
 export const memberRouteHandlers = {

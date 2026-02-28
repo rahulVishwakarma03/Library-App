@@ -1,7 +1,7 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
-import { mockRequests } from "../../data/mock_requests.js";
+import { mockReqDetails } from "../../data/mock_requests.js";
 import {
   addBook,
   listAllBooks,
@@ -25,8 +25,8 @@ describe("Book services", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerAdmin.body;
-    bookDetails = mockRequests.addBook.body;
+    registrationDetails = mockReqDetails.regDetails;
+    bookDetails = mockReqDetails.bookDetails;
   });
 
   describe("Add a book", () => {
@@ -68,7 +68,7 @@ describe("Book services", () => {
         "Invalid input format",
       );
     });
-    
+
     it("should throw not found error if book is not present", () => {
       assertThrows(
         () => removeBook(dbClient, { bookId: 1 }),

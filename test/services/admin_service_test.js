@@ -2,12 +2,11 @@ import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
-import { mockRequests } from "../../data/mock_requests.js";
+import { mockReqDetails } from "../../data/mock_requests.js";
 import { loginAdmin, registerAdmin } from "../../src/services/admin_service.js";
 import {
   AuthenticationError,
   ConflictError,
-  ValidationError,
 } from "../../src/utils/custom_errors.js";
 
 describe("Admin services", () => {
@@ -18,8 +17,8 @@ describe("Admin services", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerAdmin.body;
-    loginDetails = mockRequests.loginAdmin.body;
+    registrationDetails = mockReqDetails.regDetails;
+    loginDetails = mockReqDetails.loginDetails;
   });
 
   describe("Register Admin", () => {

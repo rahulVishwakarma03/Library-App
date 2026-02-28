@@ -2,7 +2,7 @@ import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../src/db_client.js";
-import { mockRequests } from "../data/mock_requests.js";
+import { mockReqDetails } from "../data/mock_requests.js";
 import { ServerError } from "../src/utils/custom_errors.js";
 
 describe("DB Client", () => {
@@ -13,9 +13,9 @@ describe("DB Client", () => {
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
-    registrationDetails = mockRequests.registerMember.body;
-    loginDetails = mockRequests.loginMember.body;
-    bookDetails = mockRequests.addBook.body;
+    registrationDetails = mockReqDetails.regDetails;
+    loginDetails = mockReqDetails.loginDetails;
+    bookDetails = mockReqDetails.bookDetails;
   });
 
   describe("create dbClient", () => {

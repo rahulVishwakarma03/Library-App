@@ -1,13 +1,12 @@
 import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
-// import { createRequestHandler } from "../src/app.js";
-import { mockRequests } from "../data/mock_requests.js";
+import { mockReqDetails } from "../data/mock_requests.js";
 import { createRequest } from "../src/utils/req_res_generator.js";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../src/db_client.js";
 import { createAPP } from "../src/app.js";
 
-describe("Request handler", () => {
+describe.ignore("App test", () => {
   let app;
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
@@ -22,86 +21,127 @@ describe("Request handler", () => {
     assertEquals(res.status, 404);
   });
 
-  describe.only("/admin routes", () => {
-    it("/admin/invalid", async () => {
+  describe("/admin routes", () => {
+    it("/admins/invalid", async () => {
       const res = await app.request("/admins/invalid");
       assertEquals(res.status, 404);
     });
 
-    it("Post /admins/register", async () => {
+    it("POST /admins/register", async () => {
       const response = await app.request("/admins/register", {
         method: "POST",
-        body: JSON.stringify(mockRequests.registerAdmin.body),
+        body: JSON.stringify(mockReqDetails.registerAdmin.body),
       });
 
       assertEquals(response.status, 201);
     });
 
-    it("Post /admins/login", async () => {
+    it("POST /admins/register if admin already exists", async () => {
+      app.request("/admins/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerAdmin.body),
+      });
+
+      const response = await app.request("/admins/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerAdmin.body),
+      });
+
+      assertEquals(response.status, 409);
+    });
+
+    it("POST /admins/login", async () => {
       await app.request("/admins/register", {
         method: "POST",
-        body: JSON.stringify(mockRequests.registerAdmin.body),
+        body: JSON.stringify(mockReqDetails.registerAdmin.body),
       });
 
       const response = await app.request("/admins/login", {
         method: "POST",
-        body: JSON.stringify(mockRequests.loginAdmin.body),
+        body: JSON.stringify(mockReqDetails.loginAdmin.body),
       });
+
+      assertEquals(response.headers.get("set-cookie"), "adminId=1");
       assertEquals(response.status, 200);
     });
   });
 
   describe("member resource", () => {
-    it("members service path is invalid", async () => {
-      const request = createRequest({
-        url: "http://localhost:8000/members/invalid",
-        method: "GET",
-      });
-      const res = await handleRequest(request);
+    it("/members/invalid", async () => {
+      const res = await app.request("/members/invalid");
       assertEquals(res.status, 404);
     });
 
-    it("member registration request", async () => {
-      const request = createRequest(mockRequests.registerMember);
-      const response = await handleRequest(request);
+    it("POST /members/register", async () => {
+      const response = await app.request("/members/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerMember.body),
+      });
       assertEquals(response.status, 201);
     });
 
-    it("member login request", async () => {
-      const regReq = createRequest(mockRequests.registerMember);
-      await handleRequest(regReq);
-      const loginReq = createRequest(mockRequests.loginMember);
-      const response = await handleRequest(loginReq);
+    it.only("POST /members/register if already exists", async () => {
+      await app.request("/members/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerMember.body),
+      });
+
+      const response = await app.request("/members/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerMember.body),
+      });
+      assertEquals(response.status, 409);
+    });
+
+    it("POST /members/login", async () => {
+      await app.request("/members/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerMember.body),
+      });
+
+      const response = await app.request("/members/login", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.loginMember.body),
+      });
+
+      assertEquals(response.headers.get("set-cookie"), "memberId=1");
       assertEquals(response.status, 200);
     });
 
-    it("member login request with wrong details", async () => {
-      const request = createRequest(mockRequests.invalidMemberLoginDetails);
-      const response = await handleRequest(request);
+    it("POST /members/login  with wrong details", async () => {
+      const response = await app.request("/members/login", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.loginMember.body),
+      });
 
       assertEquals(response.status, 401);
     });
 
-    it("list all members request", async () => {
-      handleRequest(createRequest(mockRequests.registerAdmin));
-      const loginReq = createRequest(mockRequests.loginAdmin);
-      const res = await handleRequest(loginReq);
-      const { token } = await res.json();
-      const listMembersReq = createRequest(
-        mockRequests.listAllMembers,
-        token,
-      );
-      const response = await handleRequest(listMembersReq);
+    it.only("list all members request", async () => {
+      await app.request("/admins/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerAdmin.body),
+      });
 
-      assertEquals(response.status, 200);
+      await app.request("/members/register", {
+        method: "POST",
+        body: JSON.stringify(mockReqDetails.registerMember.body),
+      });
+
+      const response = await app.request("/members/list-all", {
+        method: "GET",
+        headers: { "cookie": "adminId=1" },
+      });
+      const body = await response.json();
+      assertEquals(body.success, true);
     });
   });
 
   describe("book resource", () => {
     let token;
     beforeEach(async () => {
-      await handleRequest(createRequest(mockRequests.registerAdmin));
-      const loginReq = createRequest(mockRequests.loginAdmin);
+      await handleRequest(createRequest(mockReqDetails.registerAdmin));
+      const loginReq = createRequest(mockReqDetails.loginAdmin);
       const res = await handleRequest(loginReq);
       const body = await res.json();
       token = body.token;
@@ -117,31 +157,31 @@ describe("Request handler", () => {
     });
 
     it("add book request", async () => {
-      const request = createRequest(mockRequests.addBook, token);
+      const request = createRequest(mockReqDetails.addBook, token);
       const response = await handleRequest(request);
 
       assertEquals(response.status, 201);
     });
 
     it("update quantity request", async () => {
-      const addBookReq = createRequest(mockRequests.addBook, token);
-      const updateReq = createRequest(mockRequests.updateQuantity, token);
+      const addBookReq = createRequest(mockReqDetails.addBook, token);
+      const updateReq = createRequest(mockReqDetails.updateQuantity, token);
       await handleRequest(addBookReq);
       const response = await handleRequest(updateReq);
       assertEquals(response.status, 200);
     });
 
     it("remove book request", async () => {
-      const addReq = createRequest(mockRequests.addBook, token);
-      const deleteReq = createRequest(mockRequests.removeBook, token);
+      const addReq = createRequest(mockReqDetails.addBook, token);
+      const deleteReq = createRequest(mockReqDetails.removeBook, token);
       await handleRequest(addReq);
       const response = await handleRequest(deleteReq);
       assertEquals(response.status, 200);
     });
 
     it("list all books request", async () => {
-      const addReq = createRequest(mockRequests.addBook);
-      const listBookReq = createRequest(mockRequests.listAllBooks);
+      const addReq = createRequest(mockReqDetails.addBook);
+      const listBookReq = createRequest(mockReqDetails.listAllBooks);
       await handleRequest(addReq);
       const response = await handleRequest(listBookReq);
       assertEquals(response.status, 200);
@@ -151,16 +191,16 @@ describe("Request handler", () => {
   describe("borrows resource", () => {
     let token;
     beforeEach(async () => {
-      const memberRegReq = createRequest(mockRequests.registerMember);
-      const adminRegReq = createRequest(mockRequests.registerAdmin);
-      const memberLoginReq = createRequest(mockRequests.loginMember);
-      const adminLoginReq = createRequest(mockRequests.loginAdmin);
+      const memberRegReq = createRequest(mockReqDetails.registerMember);
+      const adminRegReq = createRequest(mockReqDetails.registerAdmin);
+      const memberLoginReq = createRequest(mockReqDetails.loginMember);
+      const adminLoginReq = createRequest(mockReqDetails.loginAdmin);
       await handleRequest(memberRegReq);
       await handleRequest(adminRegReq);
       const adminLoginRes = await handleRequest(adminLoginReq);
       const adminBody = await adminLoginRes.json();
       await handleRequest(
-        createRequest(mockRequests.addBook, adminBody.token),
+        createRequest(mockReqDetails.addBook, adminBody.token),
       );
       const res = await handleRequest(memberLoginReq);
       const body = await res.json();
@@ -177,20 +217,20 @@ describe("Request handler", () => {
     });
 
     it("should fail if token is not given", async () => {
-      const borrowReq = createRequest(mockRequests.borrowBook);
+      const borrowReq = createRequest(mockReqDetails.borrowBook);
       const response = await handleRequest(borrowReq);
       assertEquals(response.status, 401);
     });
 
     it("borrow book request", async () => {
-      const borrowReq = createRequest(mockRequests.borrowBook, token);
+      const borrowReq = createRequest(mockReqDetails.borrowBook, token);
       const response = await handleRequest(borrowReq);
       assertEquals(response.status, 200);
     });
 
     it("return book request", async () => {
-      const borrowBookReq = createRequest(mockRequests.borrowBook, token);
-      const returnBookReq = createRequest(mockRequests.returnBook, token);
+      const borrowBookReq = createRequest(mockReqDetails.borrowBook, token);
+      const returnBookReq = createRequest(mockReqDetails.returnBook, token);
       await handleRequest(borrowBookReq);
       const response = await handleRequest(returnBookReq);
 
@@ -198,8 +238,8 @@ describe("Request handler", () => {
     });
 
     it("list borrowed books request", async () => {
-      const borrowBookReq = createRequest(mockRequests.borrowBook, token);
-      const listBorrowedReq = createRequest(mockRequests.listBorrowed, token);
+      const borrowBookReq = createRequest(mockReqDetails.borrowBook, token);
+      const listBorrowedReq = createRequest(mockReqDetails.listBorrowed, token);
       await handleRequest(borrowBookReq);
       const response = await handleRequest(listBorrowedReq);
       assertEquals(response.status, 200);

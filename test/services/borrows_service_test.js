@@ -11,7 +11,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "../../src/utils/custom_errors.js";
-import { mockRequests } from "../../data/mock_requests.js";
+import { mockReqDetails } from "../../data/mock_requests.js";
 import { registerMember } from "../../src/services/member_service.js";
 
 describe("Borrows service", () => {
@@ -22,8 +22,8 @@ describe("Borrows service", () => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockRequests.registerMember.body;
-    bookDetails = mockRequests.addBook.body;
+    registrationDetails = mockReqDetails.regDetails;
+    bookDetails = mockReqDetails.bookDetails;
   });
 
   describe("borrow book", () => {

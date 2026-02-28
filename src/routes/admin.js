@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import {
   loginAdminController,
   registerAdminController,
-} from "../controllers/admin_controller.js";
+} from "../controllers/admin_controllers.js";
 
-export const createAdminRoute = () => {
+export const createAdminRoutes = () => {
   const admin = new Hono();
 
   admin.post("/register", registerAdminController);
