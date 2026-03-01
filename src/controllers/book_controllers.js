@@ -1,7 +1,10 @@
+import { getCookie } from "hono/cookie";
 import {
   addBook,
+  borrowBook,
   listAllBooks,
   removeBook,
+  returnBook,
   updateQuantity,
 } from "../services/book_service.js";
 import { isInteger } from "../utils/utils.js";
@@ -40,5 +43,24 @@ export const updateQuantityController = async (c) => {
 export const listAllBooksController = (c) => {
   const dbClient = c.get("dbClient");
   const res = listAllBooks(dbClient);
+  return c.json(res, 200);
+};
+
+export const borrowBookController = async (c) => {
+  const dbClient = c.get("dbClient");
+  const memberId = Number(getCookie(c, "memberId"));
+  const { bookId } = await c.req.json();
+  validateInputType({ bookId, memberId }, isInteger);
+
+  const res = borrowBook(dbClient, { bookId, memberId });
+  return c.json(res, 200);
+};
+
+export const returnBookController = async (c) => {
+  const dbClient = c.get("dbClient");
+  const { transactionId } = await c.req.json();
+  validateInputType({ transactionId }, isInteger);
+
+  const res = returnBook(dbClient, { transactionId });
   return c.json(res, 200);
 };

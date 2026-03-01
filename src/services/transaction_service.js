@@ -6,53 +6,6 @@ import {
   validateInputType,
 } from "../utils/utils.js";
 
-const authorizeMember = (dbClient, request) => {
-  const authToken = parseBearerToken(request);
-  const member = dbClient.findMemberById({ memberId: authToken });
-  if (!member) {
-    throw new AuthenticationError("Unauthorized!");
-  }
-};
-
-export const borrowBook = (dbClient, { bookId, memberId }) => {
-  validateInputType({ bookId, memberId }, isInteger);
-
-  const book = dbClient.findBookById({ bookId });
-  const member = dbClient.findMemberById({ memberId });
-
-  if (!book || !member) {
-    throw new NotFoundError("bookId or memberId doesn't exist");
-  }
-
-  if (book.borrowed === book.total) {
-    throw new NotFoundError("No copy is available");
-  }
-
-  const res = dbClient.borrowBook({ bookId, memberId });
-
-  return createResponse(200, {
-    success: true,
-    data: { transactionId: res.lastInsertedRowid },
-    message: "Book borrowed successfully",
-  });
-};
-
-export const returnBook = (dbClient, { transactionId }) => {
-  validateInputType({ transactionId }, isInteger);
-
-  const transaction = dbClient.findTransactionById({ transactionId });
-
-  if (!transaction) {
-    throw new NotFoundError("Transaction id not found");
-  }
-
-  dbClient.returnBook({ transactionId });
-  return createResponse(200, {
-    success: true,
-    message: "Book returned successfully",
-  });
-};
-
 export const listBorrowed = (dbClient, { memberId }) => {
   validateInputType({ memberId }, isInteger);
 
@@ -69,8 +22,8 @@ export const borrowsRouteHandler = {
     "/borrows/list": listBorrowed,
   },
   POST: {
-    "/borrows/borrow": borrowBook,
-    "/borrows/return": returnBook,
+    // "/borrows/borrow": borrowBook,
+    // "/borrows/return": returnBook,
   },
 };
 

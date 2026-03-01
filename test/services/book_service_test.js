@@ -4,8 +4,10 @@ import { DatabaseSync } from "node:sqlite";
 import { mockReqDetails } from "../../data/mock_requests.js";
 import {
   addBook,
+  borrowBook,
   listAllBooks,
   removeBook,
+  returnBook,
   updateQuantity,
 } from "../../src/services/book_service.js";
 import { DbClient } from "../../src/db_client.js";
@@ -14,18 +16,17 @@ import {
   NotFoundError,
   ValidationError,
 } from "../../src/utils/custom_errors.js";
-import { borrowBook } from "../../src/services/borrows_service.js";
 import { registerMember } from "../../src/services/member_service.js";
 
 describe("Book services", () => {
   let dbClient;
-  let registrationDetails;
+  let regDetails;
   let bookDetails;
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    registrationDetails = mockReqDetails.regDetails;
+    regDetails = mockReqDetails.regDetails;
     bookDetails = mockReqDetails.bookDetails;
   });
 
@@ -62,7 +63,7 @@ describe("Book services", () => {
     });
 
     it("should throw conflict error if some book copies are still borrowed", () => {
-      registerMember(dbClient, registrationDetails);
+      registerMember(dbClient, regDetails);
       addBook(dbClient, bookDetails);
       borrowBook(dbClient, { bookId: 1, memberId: 1 });
       assertThrows(
@@ -80,7 +81,7 @@ describe("Book services", () => {
 
   describe("Update book quantity", () => {
     it("should throw conflict error if given quantity is less than borrowed quantity", () => {
-      registerMember(dbClient, registrationDetails);
+      registerMember(dbClient, regDetails);
       addBook(dbClient, bookDetails);
       borrowBook(dbClient, { memberId: 1, bookId: 1 });
       borrowBook(dbClient, { memberId: 1, bookId: 1 });
@@ -91,7 +92,7 @@ describe("Book services", () => {
     });
 
     it("should update the total book copies quantity", () => {
-      registerMember(dbClient, registrationDetails);
+      registerMember(dbClient, regDetails);
       addBook(dbClient, bookDetails);
       assertEquals(dbClient.findBookById({ bookId: 1 }).total, 5);
       assertEquals(
@@ -108,6 +109,55 @@ describe("Book services", () => {
       const res = listAllBooks(dbClient);
       assertEquals(res.success, true);
       assertEquals(res.data.books[0].bookId, 1);
+    });
+  });
+
+  describe("borrow book", () => {
+    beforeEach(() => {
+      registerMember(dbClient, regDetails);
+      addBook(dbClient, { ...bookDetails, total: 1 });
+    });
+
+    it("should throw not found error if given bookId doesn't exist", () => {
+      assertThrows(
+        () => borrowBook(dbClient, { bookId: 2, memberId: 1 }),
+        NotFoundError,
+        "bookId doesn't exist",
+      );
+    });
+
+    it("should borrow book", () => {
+      const response = borrowBook(dbClient, { bookId: 1, memberId: 1 });
+      assertEquals(response.success, true);
+    });
+
+    it("should throw Not found error if no copy is available", () => {
+      borrowBook(dbClient, { bookId: 1, memberId: 1 });
+      assertThrows(
+        () => borrowBook(dbClient, { bookId: 1, memberId: 1 }),
+        NotFoundError,
+        "No copy is available",
+      );
+    });
+  });
+
+  describe("Return book", () => {
+    beforeEach(() => {
+      registerMember(dbClient, regDetails);
+      addBook(dbClient, { ...bookDetails, total: 1 });
+      borrowBook(dbClient, { bookId: 1, memberId: 1 });
+    });
+
+    it("should throw not found error if given transactionId doesn't exist", () => {
+      assertThrows(
+        () => returnBook(dbClient, { transactionId: 2 }),
+        NotFoundError,
+        "Transaction id not found",
+      );
+    });
+
+    it("should return the book", () => {
+      assertEquals(returnBook(dbClient, { transactionId: 1 }).success, true);
     });
   });
 });

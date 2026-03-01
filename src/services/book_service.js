@@ -4,8 +4,6 @@ import {
   ValidationError,
 } from "../utils/custom_errors.js";
 
-// import { authorizeAdmin } from "./member_service.js";
-
 export const addBook = (dbClient, { title, author, total }) => {
   if (total < 1) {
     throw new ValidationError("Total cannot be less than one");
@@ -46,8 +44,6 @@ export const removeBook = (dbClient, { bookId }) => {
 };
 
 export const updateQuantity = (dbClient, { bookId, quantity }) => {
-  // validateInputType({ bookId, quantity }, isPositiveInteger);
-
   if (quantity < 1) {
     throw new ValidationError("Total quantity can not be zero");
   }
@@ -75,5 +71,39 @@ export const listAllBooks = (dbClient) => {
     success: true,
     data: { books },
     message: "Successful",
+  };
+};
+
+export const borrowBook = (dbClient, { bookId, memberId }) => {
+  const book = dbClient.findBookById({ bookId });
+
+  if (!book) {
+    throw new NotFoundError("bookId doesn't exist");
+  }
+
+  if (book.borrowed === book.total) {
+    throw new NotFoundError("No copy is available");
+  }
+
+  const res = dbClient.borrowBook({ bookId, memberId });
+
+  return {
+    success: true,
+    data: { transactionId: res.lastInsertedRowid },
+    message: "Book borrowed successfully",
+  };
+};
+
+export const returnBook = (dbClient, { transactionId }) => {
+  const transaction = dbClient.findTransactionById({ transactionId });
+
+  if (!transaction) {
+    throw new NotFoundError("Transaction id not found");
+  }
+
+  dbClient.returnBook({ transactionId });
+  return {
+    success: true,
+    message: "Book returned successfully",
   };
 };
