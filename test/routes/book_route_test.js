@@ -190,10 +190,10 @@ describe("Book Route /books", () => {
       });
     });
 
-    // it("should fail with authentication error(401) if cookie is not provided", async () => {
-    //   const response = await app.request("/books/list-all");
-    //   assertEquals(response.status, 401);
-    // });
+    it("should fail with authentication error(401) if cookie is not provided", async () => {
+      const response = await app.request("/books/list-all");
+      assertEquals(response.status, 401);
+    });
 
     it("should list all the books", async () => {
       const response = await app.request("/books/list-all", {
