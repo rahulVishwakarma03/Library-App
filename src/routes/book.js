@@ -1,5 +1,10 @@
 import { Hono } from "hono";
-import { addBookController } from "../controllers/book_controllers.js";
+import {
+  addBookController,
+  listAllBooksController,
+  removeBookController,
+  updateQuantityController,
+} from "../controllers/book_controllers.js";
 import { NotFoundError } from "../utils/custom_errors.js";
 import { authenticateAdmin, authenticateMember } from "../middlewares.js";
 
@@ -7,6 +12,14 @@ export const createBookRoutes = () => {
   const book = new Hono();
 
   book.post("/add", authenticateAdmin, addBookController);
+  book.post("/remove", authenticateAdmin, removeBookController);
+  book.post("/update-quantity", authenticateAdmin, updateQuantityController);
+  book.get(
+    "/list-all",
+    // authenticateAdmin,
+    // authenticateMember,
+    listAllBooksController,
+  );
 
   book.notFound(() => {
     throw new NotFoundError("Invalid path");

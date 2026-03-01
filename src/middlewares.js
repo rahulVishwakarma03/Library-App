@@ -15,7 +15,7 @@ export const authenticateAdmin = async (c, next) => {
 export const authenticateMember = async (c, next) => {
   const dbClient = c.get("dbClient");
   const memberId = getCookie(c, "memberId");
-  const member = dbClient.findMemberById({ memberId });
+  const member = dbClient.findMemberById({ memberId: Number(memberId) });
 
   if (!member) {
     throw new AuthenticationError("Unauthorized!");

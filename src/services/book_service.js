@@ -3,9 +3,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "../utils/custom_errors.js";
-import { createResponse } from "../utils/req_res_generator.js";
-import { isString, validateInputType } from "../utils/utils.js";
-import { isPositiveInteger } from "./borrows_service.js";
+
 // import { authorizeAdmin } from "./member_service.js";
 
 export const addBook = (dbClient, { title, author, total }) => {
@@ -49,6 +47,11 @@ export const removeBook = (dbClient, { bookId }) => {
 
 export const updateQuantity = (dbClient, { bookId, quantity }) => {
   // validateInputType({ bookId, quantity }, isPositiveInteger);
+
+  if (quantity < 1) {
+    throw new ValidationError("Total quantity can not be zero");
+  }
+
   const book = dbClient.findBookById({ bookId });
 
   if (quantity < book.borrowed) {

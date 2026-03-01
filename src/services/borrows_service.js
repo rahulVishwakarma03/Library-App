@@ -1,8 +1,10 @@
 import { AuthenticationError, NotFoundError } from "../utils/custom_errors.js";
 import { createResponse } from "../utils/req_res_generator.js";
-import { parseBearerToken, validateInputType } from "../utils/utils.js";
-
-export const isPositiveInteger = (el) => Number.isInteger(el) && el > 0;
+import {
+  isInteger,
+  parseBearerToken,
+  validateInputType,
+} from "../utils/utils.js";
 
 const authorizeMember = (dbClient, request) => {
   const authToken = parseBearerToken(request);
@@ -13,7 +15,7 @@ const authorizeMember = (dbClient, request) => {
 };
 
 export const borrowBook = (dbClient, { bookId, memberId }) => {
-  validateInputType({ bookId, memberId }, isPositiveInteger);
+  validateInputType({ bookId, memberId }, isInteger);
 
   const book = dbClient.findBookById({ bookId });
   const member = dbClient.findMemberById({ memberId });
@@ -36,7 +38,7 @@ export const borrowBook = (dbClient, { bookId, memberId }) => {
 };
 
 export const returnBook = (dbClient, { transactionId }) => {
-  validateInputType({ transactionId }, isPositiveInteger);
+  validateInputType({ transactionId }, isInteger);
 
   const transaction = dbClient.findTransactionById({ transactionId });
 
@@ -52,7 +54,7 @@ export const returnBook = (dbClient, { transactionId }) => {
 };
 
 export const listBorrowed = (dbClient, { memberId }) => {
-  validateInputType({ memberId }, isPositiveInteger);
+  validateInputType({ memberId }, isInteger);
 
   const borrowedBooks = dbClient.findBorrowedBooksByMemberId({ memberId });
   return createResponse(200, {

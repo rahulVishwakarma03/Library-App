@@ -14,3 +14,4 @@ export const validateInputType = (inputs, predicate) => {
 };
 
 export const isString = (el) => typeof el === "string" && el !== "";
+export const isInteger = (el) => Number.isInteger(el);
