@@ -20,6 +20,7 @@ describe("Admin Route /admins", () => {
 
   it("/admins/invalid", async () => {
     const res = await app.request("/admins/invalid");
+    console.log(res);
     assertEquals(res.status, 404);
   });
 

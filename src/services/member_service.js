@@ -1,20 +1,4 @@
-import {
-  AuthenticationError,
-  ConflictError,
-  NotFoundError,
-} from "../utils/custom_errors.js";
-import { createResponse } from "../utils/req_res_generator.js";
-import { parseBearerToken, validateInputType } from "../utils/utils.js";
-import { isString } from "../utils/utils.js";
-
-export const authorizeAdmin = (dbClient, request) => {
-  const adminId = parseBearerToken(request);
-  const admin = dbClient.findAdminById({ adminId });
-
-  if (!admin) {
-    throw new AuthenticationError("Unauthorized!");
-  }
-};
+import { AuthenticationError, ConflictError } from "../utils/custom_errors.js";
 
 export const registerMember = (dbClient, { name, email, password }) => {
   const existing = dbClient.findMemberByEmail({ email });
@@ -53,32 +37,4 @@ export const listMembers = (dbClient) => {
     data: { members },
     message: "Successful",
   };
-};
-
-export const memberRouteHandlers = {
-  GET: {
-    "/members/list": listMembers,
-  },
-  POST: {
-    "/members/register": registerMember,
-    "/members/login": loginMember,
-  },
-};
-
-export const handleMemberService = async (dbClient, request) => {
-  const { url, method } = request;
-  const path = new URL(url).pathname;
-
-  if (method === "GET" && path in memberRouteHandlers.GET) {
-    const handler = memberRouteHandlers.GET[path];
-    return await handler(dbClient, request);
-  }
-
-  if (method === "POST" && path in memberRouteHandlers.POST) {
-    const body = await request.json();
-    const handler = memberRouteHandlers.POST[path];
-    return await handler(dbClient, body);
-  }
-
-  throw new NotFoundError("Path not found");
 };

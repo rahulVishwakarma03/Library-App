@@ -30,24 +30,16 @@ describe("Book services", () => {
   });
 
   describe("Add a book", () => {
-    it("should throw validation error if input format is  Invalid", () => {
-      assertThrows(
-        () => addBook(dbClient, { title: 2, author: "", total: undefined }),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
     it("should throw validation error if total is less than 1", () => {
       assertThrows(
-        () => addBook(dbClient, { title: "book1", author: "abc", total: 0 }),
+        () => addBook(dbClient, { ...bookDetails, total: 0 }),
         ValidationError,
-        "Invalid input format",
+        "Total cannot be less than one",
       );
     });
 
     it("should add book", () => {
-      assertEquals(addBook(dbClient, bookDetails).status, 201);
+      assertEquals(addBook(dbClient, bookDetails).success, true);
     });
 
     it("should throw conflict error if book already exists", () => {
@@ -61,14 +53,6 @@ describe("Book services", () => {
   });
 
   describe("Remove a book", () => {
-    it("should throw validation error if input format is  Invalid", () => {
-      assertThrows(
-        () => removeBook(dbClient, { bookId: "123" }),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
     it("should throw not found error if book is not present", () => {
       assertThrows(
         () => removeBook(dbClient, { bookId: 1 }),
@@ -90,19 +74,11 @@ describe("Book services", () => {
 
     it("should delete book", () => {
       addBook(dbClient, bookDetails);
-      assertEquals(removeBook(dbClient, { bookId: 1 }).status, 200);
+      assertEquals(removeBook(dbClient, { bookId: 1 }).success, true);
     });
   });
 
   describe("Update book quantity", () => {
-    it("should throw validation error if input format is  Invalid", () => {
-      assertThrows(
-        () => updateQuantity(dbClient, { bookId: "abc", quantity: "12" }),
-        ValidationError,
-        "Invalid input format",
-      );
-    });
-
     it("should throw conflict error if given quantity is less than borrowed quantity", () => {
       registerMember(dbClient, registrationDetails);
       addBook(dbClient, bookDetails);
@@ -119,20 +95,19 @@ describe("Book services", () => {
       addBook(dbClient, bookDetails);
       assertEquals(dbClient.findBookById({ bookId: 1 }).total, 5);
       assertEquals(
-        updateQuantity(dbClient, { bookId: 1, quantity: 10 }).status,
-        200,
+        updateQuantity(dbClient, { bookId: 1, quantity: 10 }).success,
+        true,
       );
       assertEquals(dbClient.findBookById({ bookId: 1 }).total, 10);
     });
   });
 
   describe("List all books", () => {
-    it("should list all books", async () => {
+    it("should list all books", () => {
       addBook(dbClient, bookDetails);
       const res = listAllBooks(dbClient);
-      const body = await res.json();
-      assertEquals(res.status, 200);
-      assertEquals(body.data.books[0].bookId, 1);
+      assertEquals(res.success, true);
+      assertEquals(res.data.books[0].bookId, 1);
     });
   });
 });
