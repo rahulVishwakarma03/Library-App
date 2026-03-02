@@ -3,7 +3,10 @@ import { assertEquals, assertThrows } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
 import { mockReqDetails } from "../../data/mock_requests.js";
-import { AuthenticationError } from "../../src/utils/custom_errors.js";
+import {
+  AuthenticationError,
+  ConflictError,
+} from "../../src/utils/custom_errors.js";
 import {
   listMembers,
   loginMember,
@@ -30,7 +33,11 @@ describe("Member services", () => {
 
     it("should throw conflict error if admin already exists with the same email", () => {
       registerMember(dbClient, registrationDetails);
-      assertThrows(() => registerMember(dbClient, registrationDetails));
+      assertThrows(
+        () => registerMember(dbClient, registrationDetails),
+        ConflictError,
+        "Member already exists",
+      );
     });
   });
 
@@ -52,6 +59,7 @@ describe("Member services", () => {
 
   describe("list all members", () => {
     it("should list all members", () => {
+      registerMember(dbClient, registrationDetails);
       const res = listMembers(dbClient);
       assertEquals(res.success, true);
     });

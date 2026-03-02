@@ -19,8 +19,8 @@ describe("Admin Route /admins", () => {
   });
 
   it("/admins/invalid", async () => {
-    const res = await app.request("/admins/invalid");
-    assertEquals(res.status, 404);
+    const response = await app.request("/admins/invalid");
+    assertEquals(response.status, 404);
   });
 
   describe("POST /admins/register", () => {
@@ -33,7 +33,7 @@ describe("Admin Route /admins", () => {
       assertEquals(response.status, 400);
     });
 
-    it("should fail with validation error(400) if registration details are not invalid", async () => {
+    it("should fail with validation error(400) if registration details are invalid", async () => {
       const response = await app.request("/admins/register", {
         method: "POST",
         body: JSON.stringify({ name: 123, email: 124, password: 123 }),
@@ -83,7 +83,7 @@ describe("Admin Route /admins", () => {
       assertEquals(response.status, 400);
     });
 
-    it("should fail with validation error(400) if login details are not invalid", async () => {
+    it("should fail with validation error(400) if login details are invalid", async () => {
       const response = await app.request("/admins/login", {
         method: "POST",
         body: JSON.stringify({ email: 124, password: 123 }),

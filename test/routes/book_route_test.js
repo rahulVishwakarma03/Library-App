@@ -11,6 +11,7 @@ describe("Book Route /books", () => {
   let loginDetails;
   let bookDetails;
   let adminCookie;
+
   beforeEach(async () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
@@ -33,8 +34,8 @@ describe("Book Route /books", () => {
   });
 
   it("should fail if path is /books/invalid", async () => {
-    const res = await app.request("/books/invalid");
-    assertEquals(res.status, 404);
+    const response = await app.request("/books/invalid");
+    assertEquals(response.status, 404);
   });
 
   describe("POST /books/add", () => {
@@ -55,7 +56,7 @@ describe("Book Route /books", () => {
       assertEquals(response.status, 400);
     });
 
-    it("should fail with validation error(400) if book details are not invalid", async () => {
+    it("should fail with validation error(400) if book details are invalid", async () => {
       const response = await app.request("/books/add", {
         method: "POST",
         headers: { cookie: adminCookie },
@@ -71,7 +72,6 @@ describe("Book Route /books", () => {
         headers: { cookie: adminCookie },
         body: JSON.stringify(bookDetails),
       });
-
       assertEquals(response.status, 201);
     });
   });

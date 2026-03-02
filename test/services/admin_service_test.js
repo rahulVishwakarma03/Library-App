@@ -32,6 +32,7 @@ describe("Admin services", () => {
       assertThrows(
         () => registerAdmin(dbClient, registrationDetails),
         ConflictError,
+        "Admin already exists",
       );
     });
   });
@@ -48,6 +49,7 @@ describe("Admin services", () => {
     it("should login if login details is correct", () => {
       registerAdmin(dbClient, registrationDetails);
       const res = loginAdmin(dbClient, loginDetails);
+      
       assertEquals(res.success, true);
     });
   });

@@ -19,8 +19,8 @@ describe("Member Route /members", () => {
   });
 
   it("/members/invalid", async () => {
-    const res = await app.request("/members/invalid");
-    assertEquals(res.status, 404);
+    const response = await app.request("/members/invalid");
+    assertEquals(response.status, 404);
   });
 
   describe("POST /members/register", () => {
@@ -61,7 +61,6 @@ describe("Member Route /members", () => {
         method: "POST",
         body: JSON.stringify(regDetails),
       });
-
       assertEquals(response.status, 409);
     });
   });
@@ -113,11 +112,19 @@ describe("Member Route /members", () => {
   });
 
   describe("GET /members/list-all", () => {
+    let adminCookie;
     beforeEach(async () => {
       await app.request("/admins/register", {
         method: "POST",
         body: JSON.stringify(regDetails),
       });
+
+      const adminLoginRes = await app.request("/admins/login", {
+        method: "POST",
+        body: JSON.stringify(loginDetails),
+      });
+
+      adminCookie = adminLoginRes.headers.get("set-cookie");
 
       await app.request("/members/register", {
         method: "POST",
@@ -136,8 +143,9 @@ describe("Member Route /members", () => {
     it("should list all members details", async () => {
       const response = await app.request("/members/list-all", {
         method: "GET",
-        headers: { "cookie": "adminId=1" },
+        headers: { cookie: adminCookie },
       });
+
       assertEquals(response.status, 200);
     });
   });

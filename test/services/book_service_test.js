@@ -88,6 +88,8 @@ describe("Book services", () => {
       borrowBook(dbClient, { memberId: 1, bookId: 1 });
       assertThrows(
         () => updateQuantity(dbClient, { bookId: 1, quantity: 2 }),
+        ConflictError,
+        "cannot be less than borrowed",
       );
     });
 
