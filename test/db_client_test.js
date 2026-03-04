@@ -269,14 +269,13 @@ describe("DB Client", () => {
     });
 
     it("Find borrowed books if book is borrowed but not returned", () => {
-      const res = dbClient.findBorrowedBooksByMemberId({ memberId: 1 });
+      const res = dbClient.findAllBorrowedBooksByMemberId({ memberId: 1 });
       assertEquals(res[0].bookId, 1);
     });
 
     it("Find borrowed books if book is borrowed but also returned", () => {
-      const returned = dbClient.returnBook({ transactionId: 1 });
-      console.log({ returned });
-      const res = dbClient.findBorrowedBooksByMemberId({ memberId: 1 });
+      dbClient.returnBook({ transactionId: 1 });
+      const res = dbClient.findAllBorrowedBooksByMemberId({ memberId: 1 });
       assertEquals(res, []);
     });
   });
@@ -294,6 +293,20 @@ describe("DB Client", () => {
       const res = dbClient.returnBook({ transactionId: 1 });
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
       assertEquals(res.changes, 1);
+    });
+  });
+
+  describe("findAllTransactions", () => {
+    beforeEach(() => {
+      dbClient.initializeSchema();
+      dbClient.createBook(bookDetails);
+      dbClient.createMember(registrationDetails);
+      dbClient.borrowBook({ bookId: 1, memberId: 1 });
+      dbClient.returnBook({ transactionId: 1 });
+    });
+
+    it("should list all the transactions", () => {
+      assertEquals(dbClient.findAllTransactions().length, 1);
     });
   });
 });

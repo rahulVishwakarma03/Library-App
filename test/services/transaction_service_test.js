@@ -2,7 +2,10 @@ import { beforeEach, describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
-import { listBorrowedBooks } from "../../src/services/transaction_service.js";
+import {
+  listAllTransactions,
+  listBorrowedBooks,
+} from "../../src/services/transaction_service.js";
 import { mockReqDetails } from "../../data/mock_requests.js";
 import { registerMember } from "../../src/services/member_service.js";
 import { addBook, borrowBook } from "../../src/services/book_service.js";
@@ -25,6 +28,14 @@ describe("Transaction service", () => {
       const res = listBorrowedBooks(dbClient, { memberId: 1 });
       assertEquals(res.success, true);
       assertEquals(res.data.borrowedBooks[0].bookId, 1);
+    });
+  });
+
+  describe("List all book transactions", () => {
+    it("should list all book transactions", () => {
+      const res = listAllTransactions(dbClient);
+      assertEquals(res.success, true);
+      assertEquals(res.data.transactions[0].transactionId, 1);
     });
   });
 });

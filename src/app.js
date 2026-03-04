@@ -23,6 +23,7 @@ export const createAPP = (dbClient) => {
   app.route("/members", member);
   app.route("/books", book);
   app.route("/transactions", transaction);
+  
   app.notFound(() => {
     throw new NotFoundError("Invalid path");
   });

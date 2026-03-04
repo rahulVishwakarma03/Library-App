@@ -71,4 +71,21 @@ describe("Book Route /books", () => {
       assertEquals(body.data.borrowedBooks.length, 1);
     });
   });
+
+  describe("GET /transactions/list-all", () => {
+    it("should fail with authentication error(401) if cookie is not provided", async () => {
+      const res = await app.request("/transactions/list-all");
+      assertEquals(res.status, 401);
+    });
+
+    it("should list all books transactions", async () => {
+      const res = await app.request("/transactions/list-all", {
+        method: "GET",
+        headers: { cookie: adminCookie },
+      });
+      const body = await res.json();
+      assertEquals(res.status, 200);
+      assertEquals(body.data.transactions.length, 1);
+    });
+  });
 });

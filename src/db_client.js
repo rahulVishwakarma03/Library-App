@@ -159,7 +159,7 @@ export class DbClient {
     }
   }
 
-  findBorrowedBooksByMemberId({ memberId }) {
+  findAllBorrowedBooksByMemberId({ memberId }) {
     const query =
       `SELECT transactionId, bookId, title, author, memberId FROM book_transactions
     INNER JOIN books USING(bookId)
@@ -184,15 +184,25 @@ export class DbClient {
     try {
       this.#db.exec("BEGIN");
       this.#db.prepare(updateBookQuery).run(book.borrowed - 1, bookId);
-      const trans = this.#db.prepare(updateTransQuery).run(
+      const transaction = this.#db.prepare(updateTransQuery).run(
         date.toLocaleString(),
         transactionId,
       );
       this.#db.exec("COMMIT");
-      return trans;
+      return transaction;
     } catch {
       this.#db.exec("ROLLBACK");
       return {};
     }
+  }
+
+  findAllTransactions() {
+    const query =
+      `SELECT transactionId, bookId, title, author, memberId, name, borrowedAt, returnedAt
+       FROM book_transactions
+      INNER JOIN books USING(bookId)
+      INNER JOIN members USING(memberId);`;
+
+    return this.#db.prepare(query).all();
   }
 }
