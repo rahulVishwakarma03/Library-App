@@ -155,7 +155,7 @@ export class DbClient {
       return trans;
     } catch {
       this.#db.exec("ROLLBACK");
-      return {};
+      throw new ServerError("Server error");
     }
   }
 
@@ -192,7 +192,7 @@ export class DbClient {
       return transaction;
     } catch {
       this.#db.exec("ROLLBACK");
-      return {};
+      throw new ServerError("Server error");
     }
   }
 

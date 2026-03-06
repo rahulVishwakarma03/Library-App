@@ -245,18 +245,22 @@ describe("DB Client", () => {
       assertEquals(res.lastInsertRowid, 1);
     });
 
-    it("should rollback if memberId is wrong", () => {
+    it("should rollback and throw server error if memberId is wrong", () => {
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
-      const res = dbClient.borrowBook({ bookId: 1, memberId: 2 });
+      assertThrows(
+        () => dbClient.borrowBook({ bookId: 1, memberId: 2 }),
+        ServerError,
+      );
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
-      assertEquals(res, {});
     });
 
     it("should rollback if bookId is wrong", () => {
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
-      const res = dbClient.borrowBook({ bookId: 2, memberId: 1 });
+      assertThrows(
+        () => dbClient.borrowBook({ bookId: 2, memberId: 1 }),
+        ServerError,
+      );
       assertEquals(dbClient.findBookById({ bookId: 1 }).borrowed, 0);
-      assertEquals(res, {});
     });
   });
 

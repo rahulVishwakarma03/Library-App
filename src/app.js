@@ -23,18 +23,15 @@ export const createAPP = (dbClient) => {
   app.route("/members", member);
   app.route("/books", book);
   app.route("/transactions", transaction);
-  
+
   app.notFound(() => {
     throw new NotFoundError("Invalid path");
   });
 
-  app.onError((error, c) => {
+  app.onError((e, c) => {
     // console.log(error);
-    return c.json({
-      success: error.success,
-      errorName: error.name,
-      message: error.message,
-    }, error.status);
+    const { name, message, success, status } = e;
+    return c.json({ success, errorName: name, message }, status);
   });
 
   return app;

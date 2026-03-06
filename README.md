@@ -49,7 +49,7 @@ Responsible for:
 
 Responsible for:
 
-- Business logic
+- Constraint
 - Database interaction
 - Borrow/return rules
 - Updating book availability
@@ -61,7 +61,7 @@ Stores all persistent data:
 - Books
 - Members
 - Admins
-- BorrowedBooks
+- Transactions
 
 ---
 
@@ -75,6 +75,7 @@ Stores all persistent data:
 4. Delete Book
 5. Update Book Quantity
 6. List All Books
+7. List All Members
 
 ## 👤 Member Features
 
@@ -153,6 +154,7 @@ Stores all persistent data:
 
 - bookId → REFERENCES Books(bookId)
 - memberId → REFERENCES Members(memberId)
+- borrowedAt -> NOT NULL
 
 ---
 
@@ -169,7 +171,7 @@ Stores all persistent data:
 ## Return Book Flow
 
 1. Member selects borrowed book.
-2. Remove entry from BorrowedBooks table.
+2. Update returnedAt column with current date.
 3. Decrease `borrowed` count by 1.
 
 ---
@@ -177,6 +179,6 @@ Stores all persistent data:
 # 🔐 Authentication
 
 - Admin and Member authentication handled separately.
-- Email must be unique.
+- Cookie is used for authentication
 
 ---
