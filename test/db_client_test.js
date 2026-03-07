@@ -71,6 +71,11 @@ describe("DB Client", () => {
       dbClient.createMember(registrationDetails);
     });
 
+    it("find all member", () => {
+      const members = dbClient.findAll({ table: "members" });
+      assertEquals(members[0].memberId, 1);
+    });
+
     it("find member by memberId if member is not present", () => {
       const member = dbClient.findMemberById({ memberId: 2 });
       assertEquals(member, undefined);
@@ -168,6 +173,11 @@ describe("DB Client", () => {
     beforeEach(() => {
       dbClient.initializeSchema();
       dbClient.createBook(bookDetails);
+    });
+
+    it("find all books", () => {
+      const books = dbClient.findAll({ table: "books" });
+      assertEquals(books[0].bookId, 1);
     });
 
     it("find book by bookId if book is not present", () => {

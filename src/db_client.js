@@ -81,8 +81,8 @@ export class DbClient {
     return this.#db.prepare(query).get(email, password);
   }
 
-  findAllMembers() {
-    const query = "SELECT * FROM members";
+  findAll({ table }) {
+    const query = `SELECT * FROM ${table}`;
     return this.#db.prepare(query).all();
   }
 
@@ -119,11 +119,6 @@ export class DbClient {
   findBookByTitleAndAuthor({ title, author }) {
     const query = "SELECT * FROM books WHERE title=? AND author=?";
     return this.#db.prepare(query).get(title, author);
-  }
-
-  findAllBooks() {
-    const query = "SELECT * FROM books";
-    return this.#db.prepare(query).all();
   }
 
   deleteBook({ bookId }) {

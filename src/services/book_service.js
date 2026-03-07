@@ -1,3 +1,4 @@
+import { table } from "node:console";
 import {
   ConflictError,
   NotFoundError,
@@ -65,7 +66,7 @@ export const updateQuantity = (dbClient, { bookId, quantity }) => {
 };
 
 export const listAllBooks = (dbClient) => {
-  const books = dbClient.findAllBooks();
+  const books = dbClient.findAll({ table: "books" });
 
   return {
     success: true,

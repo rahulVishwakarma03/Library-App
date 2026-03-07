@@ -30,7 +30,7 @@ export const loginMember = (dbClient, { email, password }) => {
 };
 
 export const listMembers = (dbClient) => {
-  const members = dbClient.findAllMembers();
+  const members = dbClient.findAll({ table: "members" });
 
   return {
     success: true,
