@@ -9,6 +9,8 @@ describe("Member Route /members", () => {
   let app;
   let regDetails;
   let loginDetails;
+  const headers = { "content-type": "application/json" };
+
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
@@ -27,6 +29,7 @@ describe("Member Route /members", () => {
     it("should fail with validation error(404) if registration details are not provided", async () => {
       const response = await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify({}),
       });
 
@@ -36,6 +39,7 @@ describe("Member Route /members", () => {
     it("should fail with validation error(404) if registration details are not invalid", async () => {
       const response = await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify({ name: 123, email: 124, password: 123 }),
       });
 
@@ -45,20 +49,22 @@ describe("Member Route /members", () => {
     it("should register member", async () => {
       const response = await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
-
       assertEquals(response.status, 201);
     });
 
     it("should fail with conflict error(409) if member already exists", async () => {
       app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const response = await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
       assertEquals(response.status, 409);
@@ -69,6 +75,7 @@ describe("Member Route /members", () => {
     beforeEach(async () => {
       await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
     });
@@ -76,6 +83,7 @@ describe("Member Route /members", () => {
     it("should fail with validation error(400) if login details are not provided", async () => {
       const response = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify({}),
       });
 
@@ -85,6 +93,7 @@ describe("Member Route /members", () => {
     it("should fail with validation error(400) if login details are not invalid", async () => {
       const response = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify({ email: 124, password: 123 }),
       });
 
@@ -94,7 +103,8 @@ describe("Member Route /members", () => {
     it("should fail with authentication error(401) if login details mismatched", async () => {
       const response = await app.request("/members/login", {
         method: "POST",
-        body: JSON.stringify({ email: "abc", password: "12345" }),
+        headers,
+        body: JSON.stringify({ email: "ab123@gmail.com", password: "12345" }),
       });
 
       assertEquals(response.status, 401);
@@ -103,6 +113,7 @@ describe("Member Route /members", () => {
     it("should login member", async () => {
       const response = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
@@ -116,11 +127,13 @@ describe("Member Route /members", () => {
     beforeEach(async () => {
       await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const adminLoginRes = await app.request("/admins/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
@@ -128,6 +141,7 @@ describe("Member Route /members", () => {
 
       await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
     });

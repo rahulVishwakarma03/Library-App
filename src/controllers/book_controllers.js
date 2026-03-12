@@ -1,14 +1,9 @@
 import { getCookie } from "hono/cookie";
 import * as bookServices from "../services/book_service.js";
-import { isInteger } from "../utils/utils.js";
-import { isString, validateInputType } from "../utils/utils.js";
 
 export const addBookController = async (c) => {
   const dbClient = c.get("dbClient");
-  const { title, author, total } = await c.req.json();
-
-  validateInputType({ title, author }, isString);
-  validateInputType({ total }, isInteger);
+  const { title, author, total } = await c.req.valid("json");
 
   const res = bookServices.addBook(dbClient, { title, author, total });
   return c.json(res, 201);
@@ -16,9 +11,7 @@ export const addBookController = async (c) => {
 
 export const removeBookController = async (c) => {
   const dbClient = c.get("dbClient");
-  const { bookId } = await c.req.json();
-
-  validateInputType({ bookId }, isInteger);
+  const { bookId } = await c.req.valid("json");
 
   const res = bookServices.removeBook(dbClient, { bookId });
   return c.json(res, 200);
@@ -26,8 +19,7 @@ export const removeBookController = async (c) => {
 
 export const updateQuantityController = async (c) => {
   const dbClient = c.get("dbClient");
-  const { bookId, quantity } = await c.req.json();
-  validateInputType({ bookId, quantity }, isInteger);
+  const { bookId, quantity } = await c.req.valid("json");
 
   const res = bookServices.updateQuantity(dbClient, { bookId, quantity });
   return c.json(res, 200);
@@ -42,8 +34,7 @@ export const listAllBooksController = (c) => {
 export const borrowBookController = async (c) => {
   const dbClient = c.get("dbClient");
   const memberId = Number(getCookie(c, "memberId"));
-  const { bookId } = await c.req.json();
-  validateInputType({ bookId, memberId }, isInteger);
+  const { bookId } = await c.req.valid("json");
 
   const res = bookServices.borrowBook(dbClient, { bookId, memberId });
   return c.json(res, 200);
@@ -51,8 +42,7 @@ export const borrowBookController = async (c) => {
 
 export const returnBookController = async (c) => {
   const dbClient = c.get("dbClient");
-  const { transactionId } = await c.req.json();
-  validateInputType({ transactionId }, isInteger);
+  const { transactionId } = await c.req.valid("json");
 
   const res = bookServices.returnBook(dbClient, { transactionId });
   return c.json(res, 200);

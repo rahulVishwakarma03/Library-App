@@ -12,6 +12,8 @@ describe("Book Route /books", () => {
   let bookDetails;
   let adminCookie;
 
+  const headers = { "content-type": "application/json" };
+
   beforeEach(async () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
@@ -23,11 +25,13 @@ describe("Book Route /books", () => {
 
     await app.request("/admins/register", {
       method: "POST",
+      headers,
       body: JSON.stringify(regDetails),
     });
 
     const res = await app.request("/admins/login", {
       method: "POST",
+      headers,
       body: JSON.stringify(loginDetails),
     });
     adminCookie = res.headers.get("set-cookie");
@@ -42,6 +46,7 @@ describe("Book Route /books", () => {
     it("should fail with authentication error(401) if cookie is not provided", async () => {
       const response = await app.request("/books/add", {
         method: "POST",
+        headers,
         body: JSON.stringify(bookDetails),
       });
       assertEquals(response.status, 401);
@@ -50,7 +55,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if book details are not provided", async () => {
       const response = await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({}),
       });
       assertEquals(response.status, 400);
@@ -59,7 +64,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if book details are invalid", async () => {
       const response = await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ title: 123, author: 124, total: "" }),
       });
 
@@ -69,7 +74,7 @@ describe("Book Route /books", () => {
     it("should add book", async () => {
       const response = await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
       assertEquals(response.status, 201);
@@ -80,7 +85,7 @@ describe("Book Route /books", () => {
     beforeEach(async () => {
       await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
     });
@@ -88,7 +93,8 @@ describe("Book Route /books", () => {
     it("should fail with authentication error(401) if cookie is not provided", async () => {
       const response = await app.request("/books/remove", {
         method: "POST",
-        body: JSON.stringify(bookDetails),
+        headers,
+        body: JSON.stringify({ bookId: 1 }),
       });
       assertEquals(response.status, 401);
     });
@@ -96,7 +102,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if book id are not provided", async () => {
       const response = await app.request("/books/remove", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({}),
       });
       assertEquals(response.status, 400);
@@ -105,7 +111,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if book id are not invalid", async () => {
       const response = await app.request("/books/remove", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: "1" }),
       });
 
@@ -115,7 +121,7 @@ describe("Book Route /books", () => {
     it("should remove book", async () => {
       const response = await app.request("/books/remove", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: 1 }),
       });
 
@@ -127,7 +133,7 @@ describe("Book Route /books", () => {
     beforeEach(async () => {
       await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
     });
@@ -135,6 +141,7 @@ describe("Book Route /books", () => {
     it("should fail with authentication error(401) if cookie is not provided", async () => {
       const response = await app.request("/books/update-quantity", {
         method: "POST",
+        headers,
         body: JSON.stringify(bookDetails),
       });
       assertEquals(response.status, 401);
@@ -143,7 +150,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if book id and quantity are invalid", async () => {
       const response = await app.request("/books/update-quantity", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: "1", quantity: "3" }),
       });
       assertEquals(response.status, 400);
@@ -152,21 +159,22 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if quantity is less than one", async () => {
       const response = await app.request("/books/update-quantity", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: 1, quantity: 0 }),
       });
-
       assertEquals(response.status, 400);
     });
 
     it("should fail with conflict error(409) if quantity is less than total borrowed", async () => {
       await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const memberLoginRes = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
@@ -174,19 +182,19 @@ describe("Book Route /books", () => {
 
       app.request("/books/borrow", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({ bookId: 1, memberId: 1 }),
       });
 
       app.request("/books/borrow", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({ bookId: 1, memberId: 1 }),
       });
 
       const response = await app.request("/books/update-quantity", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: 1, quantity: 1 }),
       });
 
@@ -196,7 +204,7 @@ describe("Book Route /books", () => {
     it("should update quantity", async () => {
       const response = await app.request("/books/update-quantity", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify({ bookId: 1, quantity: 10 }),
       });
 
@@ -209,7 +217,7 @@ describe("Book Route /books", () => {
     beforeEach(async () => {
       await app.request("/books/add", {
         method: "POST",
-        headers: { cookie: adminCookie },
+        headers: { cookie: adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
     });
@@ -235,17 +243,19 @@ describe("Book Route /books", () => {
     beforeEach(async () => {
       await app.request("/books/add", {
         method: "POST",
-        headers: { "cookie": adminCookie },
+        headers: { "cookie": adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
 
       await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const memberLoginRes = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
@@ -255,6 +265,7 @@ describe("Book Route /books", () => {
     it("should fail with authentication error(401) if cookie is not provided", async () => {
       const response = await app.request("/books/borrow", {
         method: "POST",
+        headers,
         body: JSON.stringify({ bookId: 1 }),
       });
       assertEquals(response.status, 401);
@@ -263,7 +274,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if bookId are not provided", async () => {
       const response = await app.request("/books/borrow", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({}),
       });
       assertEquals(response.status, 400);
@@ -272,7 +283,7 @@ describe("Book Route /books", () => {
     it("should borrow book", async () => {
       const response = await app.request("/books/borrow", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({ bookId: 1, memberId: 1 }),
       });
 
@@ -286,24 +297,26 @@ describe("Book Route /books", () => {
     beforeEach(async () => {
       await app.request("/books/add", {
         method: "POST",
-        headers: { "cookie": adminCookie },
+        headers: { "cookie": adminCookie, ...headers },
         body: JSON.stringify(bookDetails),
       });
 
       await app.request("/members/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const memberLoginRes = await app.request("/members/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
       memberCookie = memberLoginRes.headers.get("set-cookie");
       app.request("/books/borrow", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({ bookId: 1, memberId: 1 }),
       });
     });
@@ -311,6 +324,7 @@ describe("Book Route /books", () => {
     it("should fail with authentication error(401) if cookie is not provided", async () => {
       const response = await app.request("/books/return", {
         method: "POST",
+        headers,
         body: JSON.stringify({ bookId: 1 }),
       });
       assertEquals(response.status, 401);
@@ -319,7 +333,7 @@ describe("Book Route /books", () => {
     it("should fail with validation error(400) if transactionId are not provided", async () => {
       const response = await app.request("/books/return", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({}),
       });
       assertEquals(response.status, 400);
@@ -328,7 +342,7 @@ describe("Book Route /books", () => {
     it("should return the book", async () => {
       const response = await app.request("/books/return", {
         method: "POST",
-        headers: { cookie: memberCookie },
+        headers: { cookie: memberCookie, ...headers },
         body: JSON.stringify({ transactionId: 1 }),
       });
 

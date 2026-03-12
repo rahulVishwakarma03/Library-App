@@ -1,4 +1,3 @@
-import { table } from "node:console";
 import {
   ConflictError,
   NotFoundError,

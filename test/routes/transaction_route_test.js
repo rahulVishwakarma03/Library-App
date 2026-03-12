@@ -9,6 +9,8 @@ describe("Book Route /books", () => {
   let app;
   let adminCookie;
   let memberCookie;
+  const headers = { "content-type": "application/json" };
+
   beforeEach(async () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
@@ -20,11 +22,13 @@ describe("Book Route /books", () => {
 
     await app.request("/admins/register", {
       method: "POST",
+      headers,
       body: JSON.stringify(regDetails),
     });
 
     const adminLoginRes = await app.request("/admins/login", {
       method: "POST",
+      headers,
       body: JSON.stringify(loginDetails),
     });
 
@@ -32,11 +36,13 @@ describe("Book Route /books", () => {
 
     await app.request("/members/register", {
       method: "POST",
+      headers,
       body: JSON.stringify(regDetails),
     });
 
     const memberLoginRes = await app.request("/members/login", {
       method: "POST",
+      headers,
       body: JSON.stringify(loginDetails),
     });
 
@@ -44,13 +50,13 @@ describe("Book Route /books", () => {
 
     await app.request("/books/add", {
       method: "POST",
-      headers: { cookie: adminCookie },
+      headers: { cookie: adminCookie, ...headers },
       body: JSON.stringify(bookDetails),
     });
 
     await app.request("/books/borrow", {
       method: "POST",
-      headers: { cookie: memberCookie },
+      headers: { cookie: memberCookie, ...headers },
       body: JSON.stringify({ bookId: 1, memberId: 1 }),
     });
   });

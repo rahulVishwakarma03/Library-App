@@ -29,9 +29,8 @@ export const createAPP = (dbClient) => {
   });
 
   app.onError((e, c) => {
-    // console.log(error);
     const { name, message, success, status } = e;
-    return c.json({ success, errorName: name, message }, status);
+    return c.json({ success, errorName: name, message }, status || 500);
   });
 
   return app;

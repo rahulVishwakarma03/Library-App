@@ -9,6 +9,8 @@ describe("Admin Route /admins", () => {
   let app;
   let regDetails;
   let loginDetails;
+  const headers = { "content-type": "application/json" };
+
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
@@ -27,15 +29,16 @@ describe("Admin Route /admins", () => {
     it("should fail with validation error(400) if registration details are not provided", async () => {
       const response = await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify({}),
       });
-
       assertEquals(response.status, 400);
     });
 
     it("should fail with validation error(400) if registration details are invalid", async () => {
       const response = await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify({ name: 123, email: 124, password: 123 }),
       });
 
@@ -45,6 +48,7 @@ describe("Admin Route /admins", () => {
     it("should register admin", async () => {
       const response = await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
@@ -54,11 +58,13 @@ describe("Admin Route /admins", () => {
     it("should fail with conflict error(409) if admin already exists", async () => {
       app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
       const response = await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
 
@@ -70,6 +76,7 @@ describe("Admin Route /admins", () => {
     beforeEach(async () => {
       await app.request("/admins/register", {
         method: "POST",
+        headers,
         body: JSON.stringify(regDetails),
       });
     });
@@ -77,6 +84,7 @@ describe("Admin Route /admins", () => {
     it("should fail with validation error(400) if login details are not provided", async () => {
       const response = await app.request("/admins/login", {
         method: "POST",
+        headers,
         body: JSON.stringify({}),
       });
 
@@ -86,6 +94,7 @@ describe("Admin Route /admins", () => {
     it("should fail with validation error(400) if login details are invalid", async () => {
       const response = await app.request("/admins/login", {
         method: "POST",
+        headers,
         body: JSON.stringify({ email: 124, password: 123 }),
       });
 
@@ -95,7 +104,8 @@ describe("Admin Route /admins", () => {
     it("should fail with authentication error(401) if login details mismatched", async () => {
       const response = await app.request("/admins/login", {
         method: "POST",
-        body: JSON.stringify({ email: "abc", password: "12345" }),
+        headers,
+        body: JSON.stringify({ email: "arp@gmail.com", password: "12345" }),
       });
 
       assertEquals(response.status, 401);
@@ -104,6 +114,7 @@ describe("Admin Route /admins", () => {
     it("should login admin", async () => {
       const response = await app.request("/admins/login", {
         method: "POST",
+        headers,
         body: JSON.stringify(loginDetails),
       });
 
