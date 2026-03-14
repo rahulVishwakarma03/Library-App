@@ -39,7 +39,7 @@ describe("Admin Route /admins", () => {
       const response = await app.request("/admins/register", {
         method: "POST",
         headers,
-        body: JSON.stringify({ name: 123, email: 124, password: 123 }),
+        body: JSON.stringify({ name: "", email: 124, password: 123 }),
       });
 
       assertEquals(response.status, 400);
@@ -105,7 +105,7 @@ describe("Admin Route /admins", () => {
       const response = await app.request("/admins/login", {
         method: "POST",
         headers,
-        body: JSON.stringify({ email: "arp@gmail.com", password: "12345" }),
+        body: JSON.stringify({ email: "abc@gmail.com", password: "12345" }),
       });
 
       assertEquals(response.status, 401);
