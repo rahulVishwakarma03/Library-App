@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "./src/db_client.js";
-import { createAPP } from "./src/app.js";
+import { createApp } from "./src/app.js";
+import { logger } from "hono/logger";
 
 const onListen = ({ port }) => console.log(`Server started at ${port}...`);
 
@@ -9,7 +10,7 @@ const main = (port) => {
   const dbClient = new DbClient(db);
   dbClient.initializeSchema();
 
-  const app = createAPP(dbClient);
+  const app = createApp(dbClient, logger);
 
   Deno.serve({ port, onListen }, app.fetch);
 };

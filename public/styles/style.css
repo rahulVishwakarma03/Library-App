@@ -1,0 +1,42 @@
+* {
+      margin: 0px;
+      padding: 0px;
+      box-sizing: border-box;
+    }
+
+    main {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #sidebar {
+      width: 25vw;
+      height: 100vh;
+      background-color: antiquewhite;
+      text-align: center;
+    }
+
+    #main-container {
+      width: 74vw;
+      height: 100vh;
+      background-color: aliceblue;
+      display: flex;
+      justify-content: center;
+      padding: 4em 6em 1em 6em;
+    }
+
+    #list-container {
+      width: 100%;
+    }
+
+    .book-list {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2em;
+      border: 1px solid black;
+      border-radius: 10px;
+    }

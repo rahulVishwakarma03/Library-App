@@ -1,38 +1,29 @@
-class AppError extends Error {
-  constructor(message, statusCode) {
+export class ValidationError extends Error {
+  constructor(message) {
     super(message);
-    this.success = false;
-    this.status = statusCode;
-    this.name = this.constructor.name;
   }
 }
 
-export class ValidationError extends AppError {
+export class AuthenticationError extends Error {
   constructor(message) {
-    super(message, 400);
+    super(message);
   }
 }
 
-export class AuthenticationError extends AppError {
+export class NotFoundError extends Error {
   constructor(message) {
-    super(message, 401);
+    super(message);
   }
 }
 
-export class NotFoundError extends AppError {
+export class ConflictError extends Error {
   constructor(message) {
-    super(message, 404);
+    super(message);
   }
 }
 
-export class ConflictError extends AppError {
+export class ServerError extends Error {
   constructor(message) {
-    super(message, 409);
-  }
-}
-
-export class ServerError extends AppError {
-  constructor(message) {
-    super(message, 500);
+    super(message);
   }
 }

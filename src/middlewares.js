@@ -1,5 +1,4 @@
 import { getCookie } from "hono/cookie";
-import { AuthenticationError } from "./utils/custom_errors.js";
 
 export const authenticateAdmin = async (c, next) => {
   const dbClient = c.get("dbClient");
@@ -7,8 +6,9 @@ export const authenticateAdmin = async (c, next) => {
   const admin = dbClient.findAdminById({ adminId: Number(adminId) });
 
   if (!admin) {
-    throw new AuthenticationError("Unauthorized!");
+    return c.json("Unauthorized!", 401);
   }
+
   return await next();
 };
 
@@ -18,8 +18,9 @@ export const authenticateMember = async (c, next) => {
   const member = dbClient.findMemberById({ memberId: Number(memberId) });
 
   if (!member) {
-    throw new AuthenticationError("Unauthorized!");
+    return c.json("Unauthorized!", 401);
   }
+
   return await next();
 };
 
@@ -31,7 +32,7 @@ export const authenticateAdminOrMember = async (c, next) => {
   const member = dbClient.findMemberById({ memberId: Number(memberId) });
 
   if (!admin && !member) {
-    throw new AuthenticationError("Unauthorized!");
+    return c.json("Unauthorized!", 401);
   }
 
   return await next();

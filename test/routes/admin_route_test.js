@@ -3,7 +3,7 @@ import { assertEquals } from "@std/assert";
 import { mockReqDetails } from "../../data/mock_requests.js";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
-import { createAPP } from "../../src/app.js";
+import { createApp } from "../../src/app.js";
 
 describe("Admin Route /admins", () => {
   let app;
@@ -15,7 +15,8 @@ describe("Admin Route /admins", () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
     dbClient.initializeSchema();
-    app = createAPP(dbClient);
+    const mockLogger = () => async (_, next) => await next();
+    app = createApp(dbClient, mockLogger);
     regDetails = mockReqDetails.regDetails;
     loginDetails = mockReqDetails.loginDetails;
   });

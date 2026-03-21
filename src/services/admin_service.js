@@ -8,6 +8,7 @@ export const registerAdmin = (dbClient, { name, email, password }) => {
   }
 
   const res = dbClient.createAdmin({ name, email, password });
+
   return {
     success: true,
     data: { adminId: res.lastInsertRowid },
