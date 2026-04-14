@@ -10,13 +10,26 @@ describe("Book Route /books", () => {
   let adminCookie;
   let memberCookie;
   const headers = { "content-type": "application/json" };
+  const session = {
+    sessions: {},
+    create(user) {
+      this.sessions[1] = user;
+      return 1;
+    },
+    getUser(id) {
+      return this.sessions[id];
+    },
+    delete(id) {
+      delete this.sessions[id];
+    },
+  };
 
   beforeEach(async () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
     dbClient.initializeSchema();
     const mockLogger = () => async (_, next) => await next();
-    app = createApp(dbClient, mockLogger);
+    app = createApp(dbClient, session, mockLogger);
     const regDetails = mockReqDetails.regDetails;
     const loginDetails = mockReqDetails.loginDetails;
     const bookDetails = mockReqDetails.bookDetails;
@@ -58,7 +71,7 @@ describe("Book Route /books", () => {
     await app.request("/books/borrow", {
       method: "POST",
       headers: { cookie: memberCookie, ...headers },
-      body: JSON.stringify({ bookId: 1, memberId: 1 }),
+      body: JSON.stringify({ bookId: 1 }),
     });
   });
 

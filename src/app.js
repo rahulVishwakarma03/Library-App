@@ -11,7 +11,7 @@ import {
 } from "./utils/custom_errors.js";
 import { createTransactionRoutes } from "./routes/transaction.js";
 
-export const createApp = (dbClient, logger) => {
+export const createApp = (dbClient, session, logger) => {
   const app = new Hono();
   const admin = createAdminRoutes();
   const member = createMemberRoutes();
@@ -21,6 +21,7 @@ export const createApp = (dbClient, logger) => {
   app.use(logger());
   app.use(async (c, next) => {
     c.set("dbClient", dbClient);
+    c.set("session", session);
     await next();
   });
 

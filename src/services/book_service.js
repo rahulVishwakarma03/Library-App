@@ -89,7 +89,7 @@ export const borrowBook = (dbClient, { bookId, memberId }) => {
 
   return {
     success: true,
-    data: { transactionId: res.lastInsertedRowid },
+    data: { transactionId: res.lastInsertRowid },
     message: "Book borrowed successfully",
   };
 };

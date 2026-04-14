@@ -10,13 +10,26 @@ describe("Member Route /members", () => {
   let regDetails;
   let loginDetails;
   const headers = { "content-type": "application/json" };
+  const session = {
+    sessions: {},
+    create(user) {
+      this.sessions[1] = user;
+      return 1;
+    },
+    getUser(id) {
+      return this.sessions[id];
+    },
+    delete(id) {
+      delete this.sessions[id];
+    },
+  };
 
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
     dbClient.initializeSchema();
     const mockLogger = () => async (_, next) => await next();
-    app = createApp(dbClient, mockLogger);
+    app = createApp(dbClient, session, mockLogger);
     regDetails = mockReqDetails.regDetails;
     loginDetails = mockReqDetails.loginDetails;
   });
@@ -118,7 +131,7 @@ describe("Member Route /members", () => {
         body: JSON.stringify(loginDetails),
       });
 
-      assertEquals(response.headers.get("set-cookie"), "memberId=1");
+      assertEquals(response.headers.get("set-cookie"), "sessionId=1");
       assertEquals(response.status, 200);
     });
   });

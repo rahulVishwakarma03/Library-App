@@ -4,6 +4,7 @@ import { mockReqDetails } from "../../data/mock_requests.js";
 import { DatabaseSync } from "node:sqlite";
 import { DbClient } from "../../src/db_client.js";
 import { createApp } from "../../src/app.js";
+import { create } from "node:domain";
 
 describe("Admin Route /admins", () => {
   let app;
@@ -11,12 +12,26 @@ describe("Admin Route /admins", () => {
   let loginDetails;
   const headers = { "content-type": "application/json" };
 
+  const session = {
+    sessions: {},
+    create(user) {
+      this.sessions[1] = user;
+      return 1;
+    },
+    getUser(id) {
+      return this.sessions[id];
+    },
+    delete(id) {
+      delete this.sessions[id];
+    },
+  };
+
   beforeEach(() => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
     dbClient.initializeSchema();
     const mockLogger = () => async (_, next) => await next();
-    app = createApp(dbClient, mockLogger);
+    app = createApp(dbClient, session, mockLogger);
     regDetails = mockReqDetails.regDetails;
     loginDetails = mockReqDetails.loginDetails;
   });
@@ -119,7 +134,7 @@ describe("Admin Route /admins", () => {
         body: JSON.stringify(loginDetails),
       });
 
-      assertEquals(response.headers.get("set-cookie"), "adminId=1");
+      assertEquals(response.headers.get("set-cookie"), "sessionId=1");
       assertEquals(response.status, 200);
     });
   });

@@ -10,9 +10,11 @@ export const registerAdminController = async (c) => {
 
 export const loginAdminController = async (c) => {
   const dbClient = c.get("dbClient");
+  const session = c.get("session");
   const { email, password } = await c.req.valid("json");
   const res = loginAdmin(dbClient, { email, password });
+  const sessionId = session.create(res?.data?.adminId);
 
-  c.header("set-cookie", `adminId=${res.data.adminId}`);
+  c.header("set-cookie", `sessionId=${sessionId}`);
   return c.json(res, 200);
 };

@@ -14,12 +14,25 @@ describe("Book Route /books", () => {
 
   const headers = { "content-type": "application/json" };
 
+  const session = {
+    sessions: {},
+    create(user) {
+      this.sessions[1] = user;
+      return 1;
+    },
+    getUser(id) {
+      return this.sessions[id];
+    },
+    delete(id) {
+      delete this.sessions[id];
+    },
+  };
   beforeEach(async () => {
     const db = new DatabaseSync(":memory:");
     const dbClient = new DbClient(db);
     dbClient.initializeSchema();
     const mockLogger = () => async (_, next) => await next();
-    app = createApp(dbClient, mockLogger);
+    app = createApp(dbClient, session, mockLogger);
     regDetails = mockReqDetails.regDetails;
     loginDetails = mockReqDetails.loginDetails;
     bookDetails = mockReqDetails.bookDetails;

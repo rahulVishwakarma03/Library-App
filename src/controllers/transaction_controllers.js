@@ -6,7 +6,9 @@ import {
 
 export const listBorrowedController = (c) => {
   const dbClient = c.get("dbClient");
-  const memberId = getCookie(c, "memberId");
+  const session = c.get("session");
+  const sessionId = Number(getCookie(c, "sessionId"));
+  const memberId = session.getUser(sessionId);
   const res = listBorrowedBooks(dbClient, { memberId: Number(memberId) });
 
   return c.json(res, 200);

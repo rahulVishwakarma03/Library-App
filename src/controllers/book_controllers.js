@@ -33,7 +33,9 @@ export const listAllBooksController = (c) => {
 
 export const borrowBookController = async (c) => {
   const dbClient = c.get("dbClient");
-  const memberId = Number(getCookie(c, "memberId"));
+  const session = c.get("session");
+  const sessionId = Number(getCookie(c, "sessionId"));
+  const memberId = session.getUser(sessionId);
   const { bookId } = await c.req.valid("json");
 
   const res = bookServices.borrowBook(dbClient, { bookId, memberId });

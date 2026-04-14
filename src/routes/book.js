@@ -45,12 +45,14 @@ export const createBookRoutes = () => {
     updateQuantityController,
   );
   book.get("/list-all", authenticateAdminOrMember, listAllBooksController);
+  
   book.post(
     "/borrow",
     authenticateMember,
     sValidator("json", bookIdSchema),
     borrowBookController,
   );
+
   book.post(
     "/return",
     authenticateMember,
